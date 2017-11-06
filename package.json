@@ -1,0 +1,16 @@
+{
+  "name": "jquery-bootstrap-markdown",
+  "version": "0.1.0",
+  "homepage": "https://github.com/FCOO/jquery-bootstrap-markdown",
+  "author": "NielsHolt nho@fcoo.dk",
+  "description": "package.json is only use for building the package. see bower.json for more info",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/FCOO/jquery-bootstrap-markdown.git"
+  },
+  "dependencies": {
+    "grunt": "^0.4.0",
+    "grunt-fcoo-grunt-plugin": "^2.0.0"
+  },
+  "license": "MIT"
+}

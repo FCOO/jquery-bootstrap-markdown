@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="da" style="font-size: 100%">
+<head>
+    <title>fcoo.dk - jquery-bootstrap-markdown - Demo</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv='x-dns-prefetch-control' content='on'>
+
+    <meta name='copyright' content='FCOO'>
+    <meta name='owner' content='FCOO'>
+
+    <link  href="bower_components.css" rel="stylesheet">	
+</head>
+
+<body>
+	<script src="bower_components.js"></script>
+	<script src="../src/jquery-bootstrap-markdown.js"></script>
+	<script>
+        i18next.init();        
+        i18next.changeLanguage('en');
+        var theMarkdown;
+        function showMarkdown(){
+            theMarkdown =
+                theMarkdown || $.bsMarkdown({
+                    url : 'data/browser/browser.md',
+                    header: 'This is the header',
+                    loading: 'Loading...'
+                });
+
+            theMarkdown.asBsModal( true );
+        }
+	</script>
+
+    <button onClick="showMarkdown()">Click here!</button>
+</body>
+</html>
