@@ -238,6 +238,7 @@
 //                    }
                     fixedContent : this.options.fixedContent,
                     flex         : true,
+                    extraWidth   : true,
 //                    noVerticalPadding
                     content      : function( $container ){ _this.$modalContainer = $container; },
                     scroll       : true,
@@ -245,6 +246,7 @@
                     extended: {
                         fixedContent
                         flex
+                        extraWidth: true,
                         noVerticalPadding
                         content
                         scroll: boolean | 'vertical' | 'horizontal'
