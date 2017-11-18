@@ -46,6 +46,7 @@ http://FCOO.github.io/jquery-bootstrap-markdown/demo/
 | `language` | `string` | `"en"` | Current language-code |
 | `reload` | boolean | `false` | If true the file is reloaded every time it is displayed |
 | `header`, `fixedContent`, `footer`, `loading` | | | Options for bsModal. See [jquery-bootstrap](https://github.com/FCOO/jquery-bootstrap) |
+| `extraWidth` | `boolean` | `false` | See options for [jquery-bootstrap](https://github.com/FCOO/jquery-bootstrap) |
 
 
 ### Methods
