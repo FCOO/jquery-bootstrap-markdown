@@ -1,34 +1,34 @@
 {
-    "name": "jquery-bootstrap-markdown",
-    "version": "0.2.0",
-    "homepage": "https://github.com/FCOO/jquery-bootstrap-markdown",
-    "authors": [
-        "NielsHolt"
-    ],
-    "description": "",
-    "main": [
-        "dist/jquery-bootstrap-markdown.js"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/FCOO/jquery-bootstrap-markdown.git"
-    },
-    "dependencies": {
-        "jquery": "latest",
-        "jquery-bootstrap": "fcoo/jquery-bootstrap#^1.8.1",
-        "promise-get": "fcoo/promise-get#^0.1.0",
-        "showdown": "^1.8.1"
-    },
-    "devDependencies": {},
-    "license": "MIT",
-    "ignore": [
-        "**/.*",
-        "node_modules",
-        "bower_components",
-        "test",
-        "tests"
-    ],
-    "moduleType": [
-        "es6"
-    ]
+  "name": "jquery-bootstrap-markdown",
+  "version": "0.2.1",
+  "homepage": "https://github.com/FCOO/jquery-bootstrap-markdown",
+  "authors": [
+    "NielsHolt"
+  ],
+  "description": "",
+  "main": [
+    "dist/jquery-bootstrap-markdown.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/FCOO/jquery-bootstrap-markdown.git"
+  },
+  "dependencies": {
+    "jquery": "latest",
+    "jquery-bootstrap": "fcoo/jquery-bootstrap#^1.8.1",
+    "promise-get": "fcoo/promise-get#^0.1.0",
+    "showdown": "^1.8.1"
+  },
+  "devDependencies": {},
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "moduleType": [
+    "es6"
+  ]
 }

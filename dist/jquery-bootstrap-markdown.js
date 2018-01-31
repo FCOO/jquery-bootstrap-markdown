@@ -24,11 +24,21 @@
     }
 
     //Add extentions to add default class-names to tags.
-    const classMap = {
+    var classMap = {
         table: 'table table-striped table-hover table-bordered table-responsive',
         h1    : 'd-none', //Hide header
         //td   : 'text-nowrap'
     };
+    addExtension('bindings',
+            Object.keys(classMap).map(function( key ){
+                return {
+                    type: 'output',
+                    regex: new RegExp('<'+key , 'g'),
+                    replace: '<' + key + ' class="' + classMap[key] + '"'
+                };
+            })
+    );
+/* ES6
     addExtension('bindings',
             Object.keys(classMap).map(key => ({
                 type: 'output',
@@ -36,7 +46,7 @@
                 replace: `<${key} class="${classMap[key]}"`
             }))
     );
-
+*/
     //Replace all internal href (href="#ID") with a javascript-function to scroll the element into view - prevent hashtags in the main window
     window._showdownScrollToElement = function( _this ){
         var id = $(_this).data('showdownscrollto'),
@@ -152,7 +162,7 @@
                     .empty()
                     .append( this.$loading );
 
-            Promise.getText(
+            window.Promise.getText(
                 this.options.url, {
                     "resolve": function( content ){ _this.content = content; },
                     "finally": this._onLoad.bind(this)
@@ -214,7 +224,7 @@
         },
 
 
-        setLanguage( language ){
+        setLanguage: function( language ){
             this.options.language  = language;
             if (this.content)
                 this.load();
