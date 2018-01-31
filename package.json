@@ -9,8 +9,8 @@
     "url": "git://github.com/FCOO/jquery-bootstrap-markdown.git"
   },
   "dependencies": {
-    "grunt": "^0.4.0",
-    "grunt-fcoo-grunt-plugin": "^2.0.0"
+    "grunt": "^1.0.0",
+    "grunt-fcoo-grunt-plugin": "^3.2.0"
   },
   "license": "MIT"
 }
