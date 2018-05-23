@@ -42,6 +42,7 @@ http://FCOO.github.io/jquery-bootstrap-markdown/demo/
 | :--: | :--: | :-----: | --- |
 | `url`| string | null | Url to the markdown-file |
 | `link` | string | null | Url to standalone version (html) of the file |
+| `icons` | `object` | `{externalLink: 'fa-external-link'}` | Class-names for icons on link-button |
 | `languages` | `[]string` | `['en', 'da']` | List of possible language-codes in the md-file |
 | `language` | `string` | `"en"` | Current language-code |
 | `reload` | boolean | `false` | If true the file is reloaded every time it is displayed |
@@ -65,6 +66,3 @@ Copyright (c) 2017 [FCOO](https://github.com/FCOO)
 ## Contact information
 
 NielsHolt nho@fcoo.dk
-
-
-## Credits and acknowledgements

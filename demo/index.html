@@ -9,22 +9,22 @@
     <meta name='copyright' content='FCOO'>
     <meta name='owner' content='FCOO'>
 
-    <link  href="bower_components.css" rel="stylesheet">	
+    <link  href="bower_components.css" rel="stylesheet">
 </head>
 
 <body>
 	<script src="bower_components.js"></script>
 	<script src="../src/jquery-bootstrap-markdown.js"></script>
 	<script>
-        i18next.init();        
+        i18next.init();
         i18next.changeLanguage('en');
         var theMarkdown;
         function showMarkdown(){
             theMarkdown =
                 theMarkdown || $.bsMarkdown({
-                    url : 'data/browser/browser.md',
+                    url : 'data/browser/browser.txt',
                     header: 'This is the header',
-                    loading: 'Loading...'
+                    loading: 'Loading...',
                 });
 
             theMarkdown.asBsModal( true );
