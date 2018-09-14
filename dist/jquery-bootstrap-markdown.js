@@ -250,7 +250,7 @@
 //                        diminish: {onClick, attr, className, attr, data }
 //                    }
                     fixedContent : this.options.fixedContent,
-                    flex         : true,
+                    flexWidth    : true,
                     extraWidth   : this.options.extraWidth,
 //                    noVerticalPadding
                     content      : function( $container ){ _this.$modalContainer = $container; },
@@ -258,7 +258,7 @@
 /*
                     extended: {
                         fixedContent
-                        flex
+                        flexWidth
                         extraWidth: true,
                         noVerticalPadding
                         content
