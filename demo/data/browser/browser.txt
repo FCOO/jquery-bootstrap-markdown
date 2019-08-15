@@ -19,6 +19,10 @@ div.test  { background-image: url(http://ifm.fcoo.dk/images//safari.png); }
 <da># Test af Operativsystemer og Browsere</da>
 <en># Test of Operating Systems and Browsers</en>
 
+<da>Dette er et url-link to <link   url="/demo/data/test1.txt">data/test1.txt</link></da>
+<en>This is a url-link to <link   url="/demo/data/test1.txt">data/test1.txt</link></en>
+<da>Dette er et src-link to <link   url="/demo/data/test1.txt">test1.txt</link></da>
+<en>This is a src-link to <link   url="/demo/data/test1.txt">test1.txt</link></en>
 
 <da>[FCOO]:https://fcoo.dk</da>
 <en>[FCOO]:https://fcoo.dk?lang=eng</en>

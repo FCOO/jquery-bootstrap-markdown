@@ -14,12 +14,20 @@ All internal links (e.q. `<a href="#demo">Go to demo</a>`) are converted to `scr
 The languages must be given in `options` (see below) and *jquery-bootstrap-markdown* will remove the not-selected language-tags
 
 #### Example
-The contents of a markdown-file could be 
 
 	<da># Dette er overskriften</da><en># This is the header</en>
 	<da>Dette er første afsnit...</da>
 	<en>This is first section...</en>
 
+### Link to other md-files
+*jquery-bootstrap-markdown* supports special link-tags to allow link to other md-files.
+
+    <link url="...">Text</link>
+
+#### Example
+
+	<da>Klik <link url="another_file.txt">her</link> for at se en anden fil</da>
+	<en>Click <link url="another_file.txt">here</link> to see another file</en>
 
 ## Installation
 ### bower
@@ -55,7 +63,7 @@ http://FCOO.github.io/jquery-bootstrap-markdown/demo/
     .asBsModal(); //Create and returns a bsModal displaying the markdown-file
 
 	.load(); //(re-)load the content
-
+    .load(url); //load new content
 	.setLanguage( language ); //Change the language
 
 ## Copyright and License

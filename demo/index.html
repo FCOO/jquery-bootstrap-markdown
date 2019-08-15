@@ -10,15 +10,19 @@
     <meta name='owner' content='FCOO'>
 
     <link  href="bower_components.css" rel="stylesheet">
+    <link  href="css/all.css" rel="stylesheet">
+
 </head>
 
 <body>
 	<script src="bower_components.js"></script>
 	<script src="../src/jquery-bootstrap-markdown.js"></script>
 	<script>
+        window.bsIsTouch = false;
+        window.bsIsTouch = (window.location.search =='?touch');
         i18next.init();
         i18next.changeLanguage('en');
-        var theMarkdown;
+        var theMarkdown, theMarkdown2;
         function showMarkdown(){
             theMarkdown =
                 theMarkdown || $.bsMarkdown({
@@ -28,7 +32,16 @@
                 });
 
             theMarkdown.asBsModal( true );
-        }
+
+            theMarkdown2 =
+                theMarkdown2 || $.bsMarkdown({
+                    url : 'data/test1.txt',
+                    header: 'This is the test1',
+                    loading: 'Loading...',
+                });
+
+            theMarkdown2.asBsModal( true );
+}
 	</script>
 
     <button onClick="showMarkdown()">Click here!</button>

@@ -1,6 +1,6 @@
 {
   "name": "jquery-bootstrap-markdown",
-  "version": "0.3.1",
+  "version": "1.0.0",
   "homepage": "https://github.com/FCOO/jquery-bootstrap-markdown",
   "authors": [
     "NielsHolt"
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "jquery": "latest",
-    "jquery-bootstrap": "fcoo/jquery-bootstrap#^1.35.0",
+    "jquery-bootstrap": "fcoo/jquery-bootstrap#^1.52.0",
     "promise-get": "fcoo/promise-get#latest",
     "showdown": "^1.8.1"
   },

@@ -11,6 +11,8 @@
 (function ($, window/*, document, undefined*/) {
 	"use strict";
 
+    var currentBsMarkdown = null;
+
     /******************************************************
     SHOWDOWN
     Creating extensions and setting default options and plugins
@@ -56,14 +58,14 @@
     };
     addExtension('scrollTo',{
         type: 'output',
-        regex: /<a href="\#/g,
+        regex: /<a\s+href="\#/g,
         replace: '<a href="javascript:undefined" onClick="javascript:_showdownScrollToElement(this);" data-showdownscrollto="'
     });
 
     //Force all href to go to new window
     addExtension('hrefTarget', {
         type: 'output',
-        regex: /<a href="/g,
+        regex: /<a\s+href="/g,
         replace: '<a target="_blank" href="'
     });
 
@@ -99,6 +101,27 @@
         }
     });
 
+
+    //Convert >link url="...">text</link> to <a> calling load()
+    window._showdownLink = function( elem ){
+        if (currentBsMarkdown)
+            currentBsMarkdown.load(elem.dataset.url);
+    };
+
+    addExtension('linkTargetEnd', {
+        type: 'output',
+        regex: /<\/link>/g,
+        replace: '</a>'
+    });
+    addExtension('linkTarget', {
+        type: 'output',
+        regex: /<link\s+url="/g,
+        replace: '<a href="javascript:undefined" onClick="javascript:_showdownLink(this);" data-url="'
+    });
+
+
+
+
     //Default showdown options
     var showdownOptions = {
             extensions                          : showDownExtensions,
@@ -111,7 +134,6 @@
             ghMentions                          : true, //Enable support for github @mentions
             simpleLineBreaks                    : true, //Parse line breaks as <br/> in paragraphs (like GitHub does)
         };
-
 
     /******************************************************
     BsMarkdown
@@ -139,6 +161,7 @@
             this.options.loading ?
                 $('<div/>')
                     .addClass('text-center')
+            .css('margin', 'auto auto')
                     ._bsAddHtml( this.options.loading )
             : null;
         this.options.language = this.options.language || this.options.languages[0];
@@ -154,21 +177,37 @@
 	//Extend the prototype
 	$.BsMarkdown.prototype = {
 
-        load: function(){
+        /****************************************************
+        Load content
+        ****************************************************/
+        load: function( url ){
             var _this = this;
 
+            if (!this.previousBsMarkdown){
+                this.previousBsMarkdown = currentBsMarkdown;
+                currentBsMarkdown = this;
+            }
+
             this.content = '';
+            this.options.url = url || this.options.url;
 
             //Add 'loading...' to modal (if any)
-            if (this.$modalContainer)
+            if (this.$modalContainer){
+                //Preserve the height of the modal during loading
+                var $parent = this.$modalContainer.parent(),
+                    cHeight = this.$modalContainer.height(),
+                    pHeight = $parent.outerHeight(true);
+                if (cHeight)
+                    $parent.css('height', pHeight+'px');
+
                 this.$modalContainer
                     .empty()
                     .append( this.$loading );
-
+            }
             window.Promise.getText(
-                this.options.url, {
+                _this.options.url, {
                     "resolve": function( content ){ _this.content = content; },
-                    "finally": this._onLoad.bind(this)
+                    "finally": _this._onLoad.bind(_this)
                 }
             );
         },
@@ -191,9 +230,74 @@
                     this._adjustLanguage( this.content, this.options.language )
                 )
             );
+            this._updateHistory();
+
+            //Remove fixed height set during loading
+            this.$modalContainer.parent().css('height', 'initial');
+        },
+
+        _onClose: function(){
+            currentBsMarkdown = this.previousBsMarkdown;
+            this.previousBsMarkdown = null;
+            this.historyList = null;
+        },
+
+        /****************************************************
+        History
+        Maintains a stacked list of previous shown file-names
+        allowing for the user to go back and forward between
+        the files
+        ****************************************************/
+        //_updateHistory: Updates this.historyList and back- and forward-icon-buttons when this.options.url is loaded
+        _updateHistory: function(){
+            if (!this.historyList){
+                //First load => init and hide icons
+                this.addToHistoryList = true;
+                this.historyList = [this.options.url];
+                this.historyIndex = 0;
+                this.historyLastIndex = 0;
+
+                //Hide icons
+                this.bsModal.getHeaderIcon('back').css('visibility', 'hidden');
+                this.bsModal.getHeaderIcon('forward').css('visibility', 'hidden');
+
+                return;
+            }
+
+            if (this.addToHistoryList){
+                this.historyIndex++;
+                this.historyList.splice(this.historyIndex);
+                this.historyList.push(this.options.url);
+                this.historyLastIndex = this.historyList.length-1;
+            }
+            else
+                this.addToHistoryList = true;
+
+            //Show icons
+            this.bsModal.getHeaderIcon('back').css('visibility', 'initial');
+            this.bsModal.getHeaderIcon('forward').css('visibility', 'initial');
+
+            //Update icons
+            this.bsModal.setHeaderIconEnabled('back'   , !this.historyIndex );
+            this.bsModal.setHeaderIconEnabled('forward', this.historyIndex == this.historyLastIndex);
+        },
+
+        _back: function(){
+            this.addToHistoryList = false;
+            this.historyIndex--;
+            this.load( this.historyList[this.historyIndex] );
+        },
+
+        _forward: function(){
+            this.addToHistoryList = false;
+            this.historyIndex++;
+            this.load( this.historyList[this.historyIndex] );
         },
 
 
+        /****************************************************
+        Language
+        ****************************************************/
         //_adjustLanguage - Remove contents in <en>..</en> in danish versions and <da>..</da> in english versions and remove the tags <da> and </da> TODO: Skal gøre de forskellige dele skjulte
         _adjustLanguage: function( src, lang ){
 
@@ -244,17 +348,25 @@
                 $.bsModal({
                     header  : this.options.header,
                     show    : false,
-//                    icons: {
+                    icons: {
+                        back   : {onClick: function(){ _this._back();    }},
+                        forward: {onClick: function(){ _this._forward(); }},
+
 //                        close   : {onClick, attr, className, attr, data }
 //                        extend  : {onClick, attr, className, attr, data }
 //                        diminish: {onClick, attr, className, attr, data }
-//                    }
+                    },
                     fixedContent : this.options.fixedContent,
                     flexWidth    : true,
                     extraWidth   : this.options.extraWidth,
 //                    noVerticalPadding
                     content      : function( $container ){ _this.$modalContainer = $container; },
                     scroll       : true,
+
+                    onClose: function(){
+                        _this._onClose();
+                        return true;
+                    },
 /*
                     extended: {
                         fixedContent
@@ -280,7 +392,6 @@
 //                    closeText
 
                 });
-
             if (show)
                 this.bsModal.show();
 
