@@ -53,7 +53,7 @@ http://FCOO.github.io/jquery-bootstrap-markdown/demo/
 | `icons` | `object` | `{externalLink: 'fa-external-link'}` | Class-names for icons on link-button |
 | `languages` | `[]string` | `['en', 'da']` | List of possible language-codes in the md-file |
 | `language` | `string` | `"en"` | Current language-code |
-| `reload` | boolean | `false` | If true the file is reloaded every time it is displayed |
+| `reset` | boolean | `true` | If true the modal go back to the original file when it is closed => The first file is displayed when the modal reopens |
 | `header`, `fixedContent`, `footer`, `loading` | | | Options for bsModal. See [jquery-bootstrap](https://github.com/FCOO/jquery-bootstrap) |
 | `extraWidth` | `boolean` | `false` | See options for [jquery-bootstrap](https://github.com/FCOO/jquery-bootstrap) |
 

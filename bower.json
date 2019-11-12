@@ -1,6 +1,6 @@
 {
   "name": "jquery-bootstrap-markdown",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "homepage": "https://github.com/FCOO/jquery-bootstrap-markdown",
   "authors": [
     "NielsHolt"
@@ -17,7 +17,8 @@
     "jquery": "latest",
     "jquery-bootstrap": "fcoo/jquery-bootstrap#^1.52.0",
     "promise-get": "fcoo/promise-get#latest",
-    "showdown": "^1.8.1"
+    "showdown": "^1.8.1",
+    "history.js": "fcoo/history.js#^1.0.0"
   },
   "devDependencies": {},
   "license": "MIT",

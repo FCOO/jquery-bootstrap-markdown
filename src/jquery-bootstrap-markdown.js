@@ -144,7 +144,7 @@
             link        : '',           //Url to standalone version of the file
             languages   : ['en', 'da'], //List of possible language-codes in the md-file. E.q. <da>Dette er på dansk</de><en>This is in English</en>
             language    : 'en',         //Current language-code
-            reload      : false,        //If true the file is reloaded every time it is displayed
+            reset       : true,        //If true the modal go back to original file when it is closed => The first file is displayed when the modal reopens
 
             header      : '',
             fixedContent: null,         //fixed content for the modal-window
@@ -164,6 +164,14 @@
             .css('margin', 'auto auto')
                     ._bsAddHtml( this.options.loading )
             : null;
+
+
+        //Craete historyList to hole all loaded files
+        this.historyList = new window.HistoryList({
+            action   : $.proxy( this.load, this ),
+            onUpdate : $.proxy( this._updateIcons, this )
+        });
+
         this.options.language = this.options.language || this.options.languages[0];
     }
 
@@ -176,17 +184,17 @@
 
 	//Extend the prototype
 	$.BsMarkdown.prototype = {
-
         /****************************************************
         Load content
         ****************************************************/
-        load: function( url ){
-            var _this = this;
-
-            if (!this.previousBsMarkdown){
-                this.previousBsMarkdown = currentBsMarkdown;
-                currentBsMarkdown = this;
+        load: function( url, historyList ){
+            if (!historyList){
+                //load called directly => add to historyList
+                this.historyList.add( url );
+                return;
             }
+
+            var _this = this;
 
             this.content = '';
             this.options.url = url || this.options.url;
@@ -207,15 +215,18 @@
             window.Promise.getText(
                 _this.options.url, {
                     "resolve": function( content ){ _this.content = content; },
-                    "finally": _this._onLoad.bind(_this)
+                    "finally": _this._onLoad.bind(_this),
                 }
             );
         },
 
         _onLoad: function(){
-            //If no expected content was loaded => close the modal-window
+            //If no expected content was loaded => go back to previous file (if any) or close the modal-window
             if (!this.content){
-                this.bsModal.modal('hide');
+                if (this.historyList.index >= 0)
+                    this.historyList.goBack();
+                else
+                    this.bsModal.modal('hide');
                 return;
             }
 
@@ -230,7 +241,6 @@
                     this._adjustLanguage( this.content, this.options.language )
                 )
             );
-            this._updateHistory();
 
             //Remove fixed height set during loading
             this.$modalContainer.parent().css('height', 'initial');
@@ -239,61 +249,109 @@
         _onClose: function(){
             currentBsMarkdown = this.previousBsMarkdown;
             this.previousBsMarkdown = null;
-            this.historyList = null;
+
+            if (this.options.reset){
+                //Reset and go back to original url
+                this.content = null;
+                this.options.url = this.historyList.list[0];
+                //Reset historyList
+                this.historyList.list = [];
+                this.historyList.index = -1;
+                this.historyList.lastIndex = -1;
+            }
         },
 
-        /****************************************************
-        History
-        Maintains a stacked list of previous shown file-names
-        allowing for the user to go back and forward between
-        the files
-        ****************************************************/
-        //_updateHistory: Updates this.historyList and back- and forward-icon-buttons when this.options.url is loaded
-        _updateHistory: function(){
-            if (!this.historyList){
-                //First load => init and hide icons
-                this.addToHistoryList = true;
-                this.historyList = [this.options.url];
-                this.historyIndex = 0;
-                this.historyLastIndex = 0;
-
-                //Hide icons
-                this.bsModal.getHeaderIcon('back').css('visibility', 'hidden');
-                this.bsModal.getHeaderIcon('forward').css('visibility', 'hidden');
-
-                return;
-            }
-
-            if (this.addToHistoryList){
-                this.historyIndex++;
-                this.historyList.splice(this.historyIndex);
-                this.historyList.push(this.options.url);
-                this.historyLastIndex = this.historyList.length-1;
-            }
-            else
-                this.addToHistoryList = true;
+        _updateIcons: function( backAvail, forwardAvail/*, historyList*/ ){
+            if (!this.bsModal || this.historyList.lastIndex <= 0) return;
 
             //Show icons
             this.bsModal.getHeaderIcon('back').css('visibility', 'initial');
             this.bsModal.getHeaderIcon('forward').css('visibility', 'initial');
 
             //Update icons
-            this.bsModal.setHeaderIconEnabled('back'   , !this.historyIndex );
-            this.bsModal.setHeaderIconEnabled('forward', this.historyIndex == this.historyLastIndex);
+            this.bsModal.setHeaderIconEnabled('back'   , !backAvail );
+            this.bsModal.setHeaderIconEnabled('forward', !forwardAvail );
         },
 
-        _back: function(){
-            this.addToHistoryList = false;
-            this.historyIndex--;
-            this.load( this.historyList[this.historyIndex] );
-        },
 
-        _forward: function(){
-            this.addToHistoryList = false;
-            this.historyIndex++;
-            this.load( this.historyList[this.historyIndex] );
-        },
+        /**********************************************
+        asBsModal - return a bsModal with all messages
+        **********************************************/
+        asBsModal: function( show ){
+            var _this = this;
 
+            this.bsModal =
+                this.bsModal ||
+                $.bsModal({
+                    header  : this.options.header,
+                    show    : false,
+                    icons: {
+                        back   : {onClick: function(){ _this.historyList.goBack();    }},
+                        forward: {onClick: function(){ _this.historyList.goForward(); }},
+
+//                        close   : {onClick, attr, className, attr, data }
+//                        extend  : {onClick, attr, className, attr, data }
+//                        diminish: {onClick, attr, className, attr, data }
+                    },
+                    fixedContent : this.options.fixedContent,
+                    flexWidth    : true,
+                    extraWidth   : this.options.extraWidth,
+//                    noVerticalPadding
+                    content      : function( $container ){ _this.$modalContainer = $container; },
+                    scroll       : true,
+
+
+                    onChange: function(){
+                        //Save currentBsMarkdown and sets _this as current
+                        if (currentBsMarkdown !== _this){
+                            _this.previousBsMarkdown = currentBsMarkdown;
+                            currentBsMarkdown = _this;
+                        }
+                    },
+
+                    onClose: function(){
+                        _this._onClose();
+                        return true;
+                    },
+/*
+                    extended: {
+                        fixedContent
+                        flexWidth
+                        extraWidth: true,
+                        noVerticalPadding
+                        content
+                        scroll: boolean | 'vertical' | 'horizontal'
+                        footer
+                    }
+                    isExtended: boolean
+*/
+                    footer  : this.options.footer,
+
+                    buttons : this.options.link ? [{
+                                 icon   : this.options.icons.externalLink,
+                                 text   : {da:'Vis i nyt vindue', en:'Show in new window'},
+                                 onClick: function(){
+                                              var win = window.open(_this.options.link, '_blank');
+                                              win.focus();
+                                          }
+                              }] : [],
+//                    closeText
+                });
+
+            if (this.options.reset || (this.historyList.lastIndex <= 0)){
+                //Hide back- and forward-icons
+                this.bsModal.getHeaderIcon('back').css('visibility', 'hidden');
+                this.bsModal.getHeaderIcon('forward').css('visibility', 'hidden');
+            }
+
+            if (show)
+                this.bsModal.show();
+
+            if (!this.content)
+                this.load( this.options.url );
+
+            return this.bsModal;
+        },
 
         /****************************************************
         Language
@@ -336,71 +394,6 @@
             if (this.content)
                 this.load();
         },
-
-
-        /**********************************************
-        asBsModal - return a bsModal with all messages
-        **********************************************/
-        asBsModal: function( show ){
-            var _this = this;
-            this.bsModal =
-                this.bsModal ||
-                $.bsModal({
-                    header  : this.options.header,
-                    show    : false,
-                    icons: {
-                        back   : {onClick: function(){ _this._back();    }},
-                        forward: {onClick: function(){ _this._forward(); }},
-
-//                        close   : {onClick, attr, className, attr, data }
-//                        extend  : {onClick, attr, className, attr, data }
-//                        diminish: {onClick, attr, className, attr, data }
-                    },
-                    fixedContent : this.options.fixedContent,
-                    flexWidth    : true,
-                    extraWidth   : this.options.extraWidth,
-//                    noVerticalPadding
-                    content      : function( $container ){ _this.$modalContainer = $container; },
-                    scroll       : true,
-
-                    onClose: function(){
-                        _this._onClose();
-                        return true;
-                    },
-/*
-                    extended: {
-                        fixedContent
-                        flexWidth
-                        extraWidth: true,
-                        noVerticalPadding
-                        content
-                        scroll: boolean | 'vertical' | 'horizontal'
-                        footer
-                    }
-                    isExtended: boolean
-*/
-                    footer  : this.options.footer,
-
-                    buttons : this.options.link ? [{
-                                 icon   : this.options.icons.externalLink,
-                                 text   : {da:'Vis i nyt vindue', en:'Show in new window'},
-                                 onClick: function(){
-                                              var win = window.open(_this.options.link, '_blank');
-                                              win.focus();
-                                          }
-                              }] : [],
-//                    closeText
-
-                });
-            if (show)
-                this.bsModal.show();
-
-            if (!this.content)
-                this.load();
-
-            return this.bsModal;
-        }
-
 
 	};
 

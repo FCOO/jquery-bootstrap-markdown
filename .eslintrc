@@ -2,7 +2,7 @@
     "env": {
         "browser": true,
         "jquery" : true,
-        "es6"    : false
+        "es6"    : true
     },
 
     "extends": "eslint:recommended",
@@ -10,6 +10,8 @@
     "globals": {
         "$"         : false,
         "L"         : false,
+        "window"    : false, 
+        "document"  : false,
         "undefined" : false,
         "moment"    : false,
         "Raven"     : false
@@ -21,6 +23,10 @@
         "no-mixed-spaces-and-tabs"  : "warn",
         "semi"                      : "warn",
         "no-extra-semi"             : "warn",
+        "no-extra-boolean-cast"     : "off",
+        "no-shadow-restricted-names": "off",
+        "no-prototype-builtins"     : "off",
+
         "no-useless-escape"         : "off"
     }
 }

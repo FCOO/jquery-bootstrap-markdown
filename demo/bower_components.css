@@ -4393,11 +4393,11 @@ Class ps__rail added by jquery-scroll-container
   transition: background-color 0.2s linear !important;
   -webkit-transition: background-color 0.2s linear !important; }
 
-.ps.ps--focus > .ps__rail,
-.ps > .ps__rail:hover,
-.ps > .ps__rail:focus,
-.ps.ps--scrolling-x > .ps__rail-x,
-.ps.ps--scrolling-y > .ps__rail-y {
+.ps.no-touch.ps--focus > .ps__rail,
+.ps.no-touch > .ps__rail:hover,
+.ps.no-touch > .ps__rail:focus,
+.ps.no-touch.ps--scrolling-x > .ps__rail-x,
+.ps.no-touch.ps--scrolling-y > .ps__rail-y {
   z-index: 102;
   background-color: #f0f0f0 !important; }
 
@@ -4406,6 +4406,9 @@ Class ps__rail added by jquery-scroll-container
   border-radius: 0.1875rem;
   transition: background-color 0.2s linear, margin 0.2s ease-in-out !important;
   -webkit-transition: background-color 0.2s linear, margin 0.2s ease-in-out !important; }
+
+.ps.touch .ps__thumb {
+  background-color: #cdcdcd !important; }
 
 .ps .ps__thumb-x {
   height: auto !important;
@@ -4421,24 +4424,24 @@ Class ps__rail added by jquery-scroll-container
   margin-left: 0.125rem;
   margin-right: 0.125rem; }
 
-.ps .ps__rail-x:hover > .ps__thumb-x,
-.ps .ps__rail-x:focus > .ps__thumb-x,
-.ps .ps__rail-x.ps--clicking .ps__thumb-x {
+.ps.no-touch .ps__rail-x:hover > .ps__thumb-x,
+.ps.no-touch .ps__rail-x:focus > .ps__thumb-x,
+.ps.no-touch .ps__rail-x.ps--clicking .ps__thumb-x {
   background-color: #a6a6a6;
   margin-top: 0.0625rem;
   margin-bottom: 0.0625rem; }
 
-.ps .ps__rail-x.ps--clicking .ps__thumb-x {
+.ps.no-touch .ps__rail-x.ps--clicking .ps__thumb-x {
   background-color: #606060; }
 
-.ps .ps__rail-y:hover > .ps__thumb-y,
-.ps .ps__rail-y:focus > .ps__thumb-y,
-.ps .ps__rail-y.ps--clicking .ps__thumb-y {
+.ps.no-touch .ps__rail-y:hover > .ps__thumb-y,
+.ps.no-touch .ps__rail-y:focus > .ps__thumb-y,
+.ps.no-touch .ps__rail-y.ps--clicking .ps__thumb-y {
   background-color: #a6a6a6;
   margin-left: 0.0625rem;
   margin-right: 0.0625rem; }
 
-.ps .ps__rail-y.ps--clicking .ps__thumb-y {
+.ps.no-touch .ps__rail-y.ps--clicking .ps__thumb-y {
   background-color: #606060; }
 
 .ps.jq-scroll-container-horizontal {
@@ -4474,6 +4477,7 @@ Class ps__rail added by jquery-scroll-container
 
 .jq-scroll-shadow {
   position: sticky;
+  position: -webkit-sticky;
   top: 0;
   left: 0;
   z-index: 104;
@@ -4482,6 +4486,14 @@ Class ps__rail added by jquery-scroll-container
     content: '';
     display: block;
     position: sticky; }
+
+.jq-scroll-container-vertical.jq-scroll-container-shadow {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important; }
+
+.jq-scroll-container-horizontal.jq-scroll-container-shadow {
+  padding-left: 0 !important;
+  padding-right: 0 !important; }
 
 .jq-scroll-container-vertical .jq-scroll-shadow {
   height: 0;
@@ -11676,6 +11688,12 @@ a.text-dark:hover, a.text-dark:focus {
 /***********************************************
 IMPORT BOOTSTRAP-SELECT SCSS
 ************************************************/
+@keyframes bs-notify-fadeOut {
+  0% {
+    opacity: 0.9; }
+  100% {
+    opacity: 0; } }
+
 select.bs-select-hidden,
 .bootstrap-select > select.bs-select-hidden,
 select.selectpicker {
@@ -11899,6 +11917,8 @@ select.selectpicker {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box; }
+    .bootstrap-select .dropdown-menu .notify.fadeOut {
+      animation: 300ms linear 750ms forwards bs-notify-fadeOut; }
 
 .bootstrap-select .no-results {
   padding: 3px;
@@ -12059,6 +12079,10 @@ $font-size-sm  : .8125rem   13px
 $font-size-xs  : .75rem     12px
 ************************************************************/
 /************************************************************
+BUTTON AND MODAL
+Opacity for semi-transparent and transparent content
+************************************************************/
+/************************************************************
 LABEL
 Font-sizes for labels are same siae as header but incl a xxs-size
 ************************************************************/
@@ -12217,13 +12241,35 @@ Bootstrap allready have the following classes
     .container-stacked-icons .stacked-icon:not(:first-child) {
       margin-left: -1em; }
 
+.text-checked, .text-active {
+  color: #007bff; }
+
 /************************************************************
-Modernizr-test for stacted icon with parent with class="active" when selected
+Modernizr-test for stacted icon with parent with
+class="active" or "checked" when selected
 ************************************************************/
 .active .container-stacked-icons i.icon-hide-for-active {
+  opacity: 0; }
+
+.active .container-stacked-icons i.icon-show-for-active {
+  opacity: inherit; }
+
+.no-active .container-stacked-icons i.icon-hide-for-active {
   opacity: inherit; }
 
 .no-active .container-stacked-icons i.icon-show-for-active {
+  opacity: 0; }
+
+.checked .container-stacked-icons i.icon-hide-for-checked {
+  opacity: 0; }
+
+.checked .container-stacked-icons i.icon-show-for-checked {
+  opacity: inherit; }
+
+.no-checked .container-stacked-icons i.icon-hide-for-checked {
+  opacity: inherit; }
+
+.no-checked .container-stacked-icons i.icon-show-for-checked {
   opacity: 0; }
 
 /************************************************************
@@ -12375,6 +12421,22 @@ div.btn, div.list-group-item {
       opacity: 1 !important;
       color: rgba(212, 212, 212, 0.65);
       background: rgba(0, 0, 0, 0) linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0)) repeat-x; }
+  .btn.btn-standard.semi-transparent {
+    background: none;
+    color: #515961;
+    background: rgba(248, 249, 250, 0.5); }
+    .mouse-hover .hover .btn.btn-standard.semi-transparent:not(:active):not(:disabled):not(.disabled),
+    .mouse-hover .btn.btn-standard.semi-transparent.hover:not(:active):not(:disabled):not(.disabled),
+    .mouse-hover .btn.btn-standard.semi-transparent:hover:not(:active):not(:disabled):not(.disabled) {
+      color: #454c53;
+      background: rgba(248, 249, 250, 0.75); }
+    .btn.btn-standard.semi-transparent:active {
+      color: #40464c;
+      background: rgba(226, 230, 234, 0.75); }
+    .btn.btn-standard.semi-transparent.disabled, .btn.btn-standard.semi-transparent:disabled {
+      opacity: 1 !important;
+      color: rgba(81, 89, 97, 0.65);
+      background: rgba(248, 249, 250, 0.5); }
   .btn.btn-standard.square {
     overflow: hidden;
     height: calc(2 * 0.3125rem + 1.5rem + 2 * 1px);
@@ -12513,6 +12575,17 @@ BUTTON-GROUP
     margin-top: 0.25rem; }
 
 /************************************************************
+MENU (BUTTON-GROUP)
+************************************************************/
+.bs-menu-container hr {
+  width: 100%;
+  margin: 0.3125rem 0;
+  padding: 0; }
+
+.bs-menu-container hr.first.before, .bs-menu-container hr.last.after, .bs-menu-container hr + hr {
+  display: none; }
+
+/************************************************************
 POPOVER
 
 ************************************************************/
@@ -12632,7 +12705,7 @@ Icons for modal header inside a container
   display: flex;
   align-items: baseline;
   flex-shrink: 0;
-  justify-content: center;
+  justify-content: space-between;
   margin-left: auto;
   margin-right: 0;
   font-size: 1.5em; }
@@ -13136,15 +13209,35 @@ body.modal-open .modal {
     margin-right: auto; }
   .modal-dialog.modal-flex-width .modal-content .modal-body > .jquery-scroll-container {
     width: auto; }
+  .modal-dialog .modal-content.modal-minimized .hide-for-modal-minimized {
+    display: none !important; }
+  .modal-dialog .modal-content.modal-minimized .show-for-no-modal-minimized {
+    display: none !important; }
+  .modal-dialog .modal-content.no-modal-minimized .show-for-modal-minimized {
+    display: none !important; }
+  .modal-dialog .modal-content.no-modal-minimized .hide-for-no-modal-minimized {
+    display: none !important; }
+  .modal-dialog .modal-content.modal-normal .hide-for-modal-normal {
+    display: none !important; }
+  .modal-dialog .modal-content.modal-normal .show-for-no-modal-normal {
+    display: none !important; }
+  .modal-dialog .modal-content.no-modal-normal .show-for-modal-normal {
+    display: none !important; }
+  .modal-dialog .modal-content.no-modal-normal .hide-for-no-modal-normal {
+    display: none !important; }
   .modal-dialog .modal-content.modal-extended .hide-for-modal-extended {
     display: none !important; }
+  .modal-dialog .modal-content.modal-extended .show-for-no-modal-extended {
+    display: none !important; }
   .modal-dialog .modal-content.no-modal-extended .show-for-modal-extended {
+    display: none !important; }
+  .modal-dialog .modal-content.no-modal-extended .hide-for-no-modal-extended {
     display: none !important; }
   .modal-dialog .modal-content.modal-pinned .hide-for-modal-pinned {
     display: none !important; }
   .modal-dialog .modal-content.no-modal-pinned .show-for-modal-pinned {
     display: none !important; }
-  .modal-dialog .modal-content:not(.modal-fixed-height).no-modal-extended:not(.modal-content-always-max-height), .modal-dialog .modal-content:not(.modal-fixed-height).modal-extended:not(.modal-extended-content-always-max-height) {
+  .modal-dialog .modal-content:not(.modal-fixed-height).modal-minimized:not(.modal-minimized-always-max-height), .modal-dialog .modal-content:not(.modal-fixed-height).modal-normal:not(.modal-normal-always-max-height), .modal-dialog .modal-content:not(.modal-fixed-height).modal-extended:not(.modal-extended-always-max-height) {
     height: auto !important; }
   .modal-dialog .modal-content .modal-body p {
     margin: 0; }
@@ -13160,8 +13253,6 @@ body.modal-open .modal {
   .modal-dialog .modal-content:not(.modal-extended) .modal-body.hide-for-modal-extended.modal-body-no-content ~ .modal-footer,
   .modal-dialog .modal-content.modal-extended .modal-body.show-for-modal-extended.modal-body-no-content ~ .modal-footer {
     border-top: none; }
-  .modal-dialog .modal-content.no-modal-header {
-    padding-top: calc( 0.3rem - 1px); }
   .modal-dialog .modal-content .modal-header {
     flex-shrink: 0;
     flex-grow: 0;
@@ -13189,6 +13280,18 @@ body.modal-open .modal {
       cursor: default; }
       .modal-dialog .modal-content .modal-header.clickable:hover {
         background-color: #e5e5e5; }
+  .modal-dialog .modal-content.modal-minimized.modal-minimized-hide-header .modal-header {
+    display: none; }
+  .modal-dialog .modal-content.modal-minimized .modal-header .header-icon-container {
+    flex-wrap: wrap;
+    flex-shrink: initial;
+    flex-grow: 1;
+    margin-top: -.2em; }
+    .modal-dialog .modal-content.modal-minimized .modal-header .header-icon-container > * {
+      margin-top: .2em;
+      margin-left: 0; }
+  .modal-dialog .modal-content.modal-minimized .modal-header > :not(.header-icon-container) {
+    display: none; }
   .modal-dialog .modal-content .modal-body-fixed {
     flex-shrink: 0;
     flex-grow: 0;
@@ -13221,11 +13324,6 @@ body.modal-open .modal {
     .modal-dialog .modal-content .modal-body.modal-type-help {
       background-color: #fefefe;
       color: #818182; }
-  .modal-dialog .modal-content .modal-footer-header:empty + .modal-footer:empty {
-    display: block;
-    height: calc( 0.3rem - 1px);
-    padding: 0;
-    border: none; }
   .modal-dialog .modal-content .modal-footer-header {
     flex-shrink: 0;
     flex-grow: 0;
@@ -13269,6 +13367,15 @@ body.modal-open .modal {
         margin: 0; }
       .modal-dialog .modal-content .modal-footer.modal-footer-vertical > *:not(:first-child) {
         margin-top: .25rem; }
+  .modal-dialog .modal-content.modal-minimized.modal-minimized-semi-transparent, .modal-dialog .modal-content.modal-normal.modal-normal-semi-transparent, .modal-dialog .modal-content.modal-extended.modal-extended-semi-transparent {
+    background: none; }
+    .modal-dialog .modal-content.modal-minimized.modal-minimized-semi-transparent .modal-body, .modal-dialog .modal-content.modal-minimized.modal-minimized-semi-transparent .modal-body-fixed, .modal-dialog .modal-content.modal-minimized.modal-minimized-semi-transparent .modal-footer, .modal-dialog .modal-content.modal-normal.modal-normal-semi-transparent .modal-body, .modal-dialog .modal-content.modal-normal.modal-normal-semi-transparent .modal-body-fixed, .modal-dialog .modal-content.modal-normal.modal-normal-semi-transparent .modal-footer, .modal-dialog .modal-content.modal-extended.modal-extended-semi-transparent .modal-body, .modal-dialog .modal-content.modal-extended.modal-extended-semi-transparent .modal-body-fixed, .modal-dialog .modal-content.modal-extended.modal-extended-semi-transparent .modal-footer {
+      background: rgba(255, 255, 255, 0.5); }
+  .mouse-hover .modal-dialog .modal-content.modal-minimized.modal-minimized-clickable .modal-body:hover, .mouse-hover .modal-dialog .modal-content.modal-minimized.modal-minimized-clickable .modal-body.hover, .mouse-hover .modal-dialog .modal-content.modal-minimized.modal-minimized-clickable .modal-body-fixed:hover, .mouse-hover .modal-dialog .modal-content.modal-minimized.modal-minimized-clickable .modal-body-fixed.hover, .mouse-hover .modal-dialog .modal-content.modal-normal.modal-normal-clickable .modal-body:hover, .mouse-hover .modal-dialog .modal-content.modal-normal.modal-normal-clickable .modal-body.hover, .mouse-hover .modal-dialog .modal-content.modal-normal.modal-normal-clickable .modal-body-fixed:hover, .mouse-hover .modal-dialog .modal-content.modal-normal.modal-normal-clickable .modal-body-fixed.hover, .mouse-hover .modal-dialog .modal-content.modal-extended.modal-extended-clickable .modal-body:hover, .mouse-hover .modal-dialog .modal-content.modal-extended.modal-extended-clickable .modal-body.hover, .mouse-hover .modal-dialog .modal-content.modal-extended.modal-extended-clickable .modal-body-fixed:hover, .mouse-hover .modal-dialog .modal-content.modal-extended.modal-extended-clickable .modal-body-fixed.hover {
+    cursor: default;
+    background: #e9ecef linear-gradient(180deg, #eceff2, #e9ecef) repeat-x; }
+    .mouse-hover .modal-dialog .modal-content.modal-minimized.modal-minimized-clickable .modal-body:hover.modal-body-semi-transparent, .mouse-hover .modal-dialog .modal-content.modal-minimized.modal-minimized-clickable .modal-body.hover.modal-body-semi-transparent, .mouse-hover .modal-dialog .modal-content.modal-minimized.modal-minimized-clickable .modal-body-fixed:hover.modal-body-semi-transparent, .mouse-hover .modal-dialog .modal-content.modal-minimized.modal-minimized-clickable .modal-body-fixed.hover.modal-body-semi-transparent, .mouse-hover .modal-dialog .modal-content.modal-normal.modal-normal-clickable .modal-body:hover.modal-body-semi-transparent, .mouse-hover .modal-dialog .modal-content.modal-normal.modal-normal-clickable .modal-body.hover.modal-body-semi-transparent, .mouse-hover .modal-dialog .modal-content.modal-normal.modal-normal-clickable .modal-body-fixed:hover.modal-body-semi-transparent, .mouse-hover .modal-dialog .modal-content.modal-normal.modal-normal-clickable .modal-body-fixed.hover.modal-body-semi-transparent, .mouse-hover .modal-dialog .modal-content.modal-extended.modal-extended-clickable .modal-body:hover.modal-body-semi-transparent, .mouse-hover .modal-dialog .modal-content.modal-extended.modal-extended-clickable .modal-body.hover.modal-body-semi-transparent, .mouse-hover .modal-dialog .modal-content.modal-extended.modal-extended-clickable .modal-body-fixed:hover.modal-body-semi-transparent, .mouse-hover .modal-dialog .modal-content.modal-extended.modal-extended-clickable .modal-body-fixed.hover.modal-body-semi-transparent {
+      background: rgba(255, 255, 255, 0.75); }
   .modal-dialog.modal-dialog-sm .modal-content .modal-header {
     font-weight: 400;
     display: flex;
@@ -13290,7 +13397,7 @@ body.modal-open .modal {
       word-break: keep-all; }
   .modal-dialog.modal-dialog-sm .modal-content .modal-body,
   .modal-dialog.modal-dialog-sm .modal-content .modal-body-fixed {
-    padding: 0.25rem 0.25rem;
+    padding: 0.3125rem 0.3125rem;
     font-size: 0.8125rem; }
   .modal-dialog.modal-dialog-sm .modal-content .modal-footer-header {
     font-weight: 400;
@@ -13337,7 +13444,7 @@ body.modal-open .modal {
       word-break: keep-all; }
   .modal-dialog.modal-dialog-xs .modal-content .modal-body,
   .modal-dialog.modal-dialog-xs .modal-content .modal-body-fixed {
-    padding: 0.25rem 0.25rem;
+    padding: 0.3125rem 0.3125rem;
     font-size: 0.75rem; }
   .modal-dialog.modal-dialog-xs .modal-content .modal-footer-header {
     font-weight: 400;
@@ -13367,32 +13474,32 @@ body.modal-open .modal {
     padding-top: 0.25rem;
     padding-bottom: 0.25rem; }
 
-.modal-dialog .modal-body-fixed.scrollbar-vertical, .modal-dialog.modal-dialog-sm .modal-body-fixed.scrollbar-vertical {
+.modal-dialog .modal-body-fixed.scrollbar-vertical,
+.modal-dialog .modal-body.scrollbar-vertical, .modal-dialog.modal-dialog-sm .modal-body-fixed.scrollbar-vertical,
+.modal-dialog.modal-dialog-sm .modal-body.scrollbar-vertical, .modal-dialog.modal-dialog-xs .modal-body-fixed.scrollbar-vertical,
+.modal-dialog.modal-dialog-xs .modal-body.scrollbar-vertical {
   padding-left: 0.625rem;
   padding-right: 0.625rem; }
 
-.modal-dialog .modal-body.scrollbar-vertical, .modal-dialog.modal-dialog-sm .modal-body.scrollbar-vertical {
-  padding-left: 0.625rem;
-  padding-right: 0.625rem; }
-
-.modal-dialog .modal-body.scrollbar-horizontal, .modal-dialog.modal-dialog-sm .modal-body.scrollbar-horizontal {
+.modal-dialog .modal-body.scrollbar-horizontal, .modal-dialog.modal-dialog-sm .modal-body.scrollbar-horizontal, .modal-dialog.modal-dialog-xs .modal-body.scrollbar-horizontal {
   padding-bottom: 0.625rem; }
+
+.modal-dialog .modal-body-with-vertical-padding {
+  padding-top: 0.3125rem;
+  padding-bottom: 0.3125rem; }
+
+.modal-dialog.modal-dialog-xs .modal-body-with-vertical-padding,
+.modal-dialog.modal-dialog-sm .modal-body-with-vertical-padding {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem; }
 
 .modal-content .modal-body-fixed.no-vertical-padding,
 .modal-content .modal-body.no-vertical-padding {
   padding-top: 0 !important;
   padding-bottom: 0 !important; }
 
-.no-vertical-padding .modal-content .modal-body-fixed, .no-vertical-padding .modal-content .modal-body {
-  padding-top: 0 !important;
-  padding-bottom: 0 !important; }
-
 .modal-content .modal-body-fixed.no-horizontal-padding,
 .modal-content .modal-body.no-horizontal-padding {
-  padding-left: 0 !important;
-  padding-right: 0 !important; }
-
-.no-horizontal-padding .modal-content .modal-body-fixed, .no-horizontal-padding .modal-content .modal-body {
   padding-left: 0 !important;
   padding-right: 0 !important; }
 
@@ -13428,7 +13535,7 @@ Style for elements used to display any file in a modal-window
     word-break: keep-all; }
 
 .file-view-content {
-  padding: 0.25rem 0.25rem;
+  padding: 0.3125rem 0.3125rem;
   font-size: 0.8125rem; }
 
 /************************************************************
@@ -13496,14 +13603,14 @@ Adjustment to bootstrap-select
     cursor: default;
     line-height: 1;
     margin-left: auto;
-    margin-right: -0.4em;
+    margin-right: 0em;
     opacity: 1; }
     .bootstrap-select .dropdown-toggle .filter-option-inner .chevrolet:before {
       font-size: 0.8em;
       content: "\f078"; }
 
 .bootstrap-select .dropdown-toggle:after {
-  border-color: transparent; }
+  display: none !important; }
 
 .bootstrap-select .dropdown-menu li a.opt {
   padding-left: 0.625rem; }
@@ -13928,7 +14035,7 @@ Adjustmernt to Bootstrap table
       color: rgba(81, 89, 97, 0.65);
       background: #f8f9fa linear-gradient(180deg, #f9fafb, #f8f9fa) repeat-x; }
   .table tbody tr td {
-    padding: 0.25rem 0.25rem;
+    padding: 0.3125rem 0.3125rem;
     font-size: 0.8125rem; }
     .table tbody tr td.no-horizontal-padding {
       padding-left: 0;
@@ -14050,7 +14157,7 @@ Using Bootstrap Collapse to create accordion
     .accordion .card-header.collapsed .chevrolet:before {
       content: "\f054"; }
   .accordion .card-block {
-    padding: 0.25rem 0.25rem;
+    padding: 0.3125rem 0.3125rem;
     font-size: 0.8125rem;
     border-radius: 0.25rem; }
   .accordion .card-footer {
@@ -14122,7 +14229,7 @@ Using Bootstrap Collapse to create accordion
 .modal-dialog-sm .accordion .card-block,
 .modal-dialog-xs .accordion .card-block,
 .accordion-sm .card-block {
-  padding: 0.25rem 0.25rem;
+  padding: 0.3125rem 0.3125rem;
   font-size: 0.8125rem; }
 
 .modal-dialog-sm .accordion .card-footer,

@@ -22,6 +22,10 @@
         window.bsIsTouch = (window.location.search =='?touch');
         i18next.init();
         i18next.changeLanguage('en');
+
+
+        Promise.defaultErrorHandler = function(reason, url){ console.log('ERROR', reason, url ); };
+
         var theMarkdown, theMarkdown2;
         function showMarkdown(){
             theMarkdown =
@@ -36,12 +40,14 @@
             theMarkdown2 =
                 theMarkdown2 || $.bsMarkdown({
                     url : 'data/test1.txt',
-                    header: 'This is the test1',
+                    header: 'This modal do not reset',
                     loading: 'Loading...',
+                    reset: false
                 });
 
             theMarkdown2.asBsModal( true );
-}
+
+        }
 	</script>
 
     <button onClick="showMarkdown()">Click here!</button>
