@@ -169,7 +169,6 @@
         //Craete historyList to hole all loaded files
         this.historyList = new window.HistoryList({
             action   : $.proxy( this.load, this ),
-            onUpdate : $.proxy( this._updateIcons, this )
         });
 
         this.options.language = this.options.language || this.options.languages[0];
@@ -261,19 +260,6 @@
             }
         },
 
-        _updateIcons: function( backAvail, forwardAvail/*, historyList*/ ){
-            if (!this.bsModal || this.historyList.lastIndex <= 0) return;
-
-            //Show icons
-            this.bsModal.getHeaderIcon('back').css('visibility', 'initial');
-            this.bsModal.getHeaderIcon('forward').css('visibility', 'initial');
-
-            //Update icons
-            this.bsModal.setHeaderIconEnabled('back'   , !backAvail );
-            this.bsModal.setHeaderIconEnabled('forward', !forwardAvail );
-        },
-
-
         /**********************************************
         asBsModal - return a bsModal with all messages
         **********************************************/
@@ -285,14 +271,7 @@
                 $.bsModal({
                     header  : this.options.header,
                     show    : false,
-                    icons: {
-                        back   : {onClick: function(){ _this.historyList.goBack();    }},
-                        forward: {onClick: function(){ _this.historyList.goForward(); }},
 
-//                        close   : {onClick, attr, className, attr, data }
-//                        extend  : {onClick, attr, className, attr, data }
-//                        diminish: {onClick, attr, className, attr, data }
-                    },
                     fixedContent : this.options.fixedContent,
                     flexWidth    : true,
                     extraWidth   : this.options.extraWidth,
@@ -300,6 +279,7 @@
                     content      : function( $container ){ _this.$modalContainer = $container; },
                     scroll       : true,
 
+                    historyList: this.historyList,
 
                     onChange: function(){
                         //Save currentBsMarkdown and sets _this as current

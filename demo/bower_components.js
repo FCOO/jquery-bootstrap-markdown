@@ -10599,7 +10599,7 @@ return jQuery;
 
 ;
 /*!
-  * Bootstrap v4.3.1 (https://getbootstrap.com/)
+  * Bootstrap v4.4.1 (https://getbootstrap.com/)
   * Copyright 2011-2019 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
   */
@@ -10607,7 +10607,7 @@ return jQuery;
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('jquery')) :
   typeof define === 'function' && define.amd ? define(['exports', 'jquery'], factory) :
   (global = global || self, factory(global.bootstrap = {}, global.jQuery));
-}(this, function (exports, $) { 'use strict';
+}(this, (function (exports, $) { 'use strict';
 
   $ = $ && $.hasOwnProperty('default') ? $['default'] : $;
 
@@ -10642,20 +10642,35 @@ return jQuery;
     return obj;
   }
 
-  function _objectSpread(target) {
+  function ownKeys(object, enumerableOnly) {
+    var keys = Object.keys(object);
+
+    if (Object.getOwnPropertySymbols) {
+      var symbols = Object.getOwnPropertySymbols(object);
+      if (enumerableOnly) symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      });
+      keys.push.apply(keys, symbols);
+    }
+
+    return keys;
+  }
+
+  function _objectSpread2(target) {
     for (var i = 1; i < arguments.length; i++) {
       var source = arguments[i] != null ? arguments[i] : {};
-      var ownKeys = Object.keys(source);
 
-      if (typeof Object.getOwnPropertySymbols === 'function') {
-        ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {
-          return Object.getOwnPropertyDescriptor(source, sym).enumerable;
-        }));
+      if (i % 2) {
+        ownKeys(Object(source), true).forEach(function (key) {
+          _defineProperty(target, key, source[key]);
+        });
+      } else if (Object.getOwnPropertyDescriptors) {
+        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+      } else {
+        ownKeys(Object(source)).forEach(function (key) {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        });
       }
-
-      ownKeys.forEach(function (key) {
-        _defineProperty(target, key, source[key]);
-      });
     }
 
     return target;
@@ -10669,7 +10684,7 @@ return jQuery;
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap (v4.3.1): util.js
+   * Bootstrap (v4.4.1): util.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
    * --------------------------------------------------------------------------
    */
@@ -10818,8 +10833,25 @@ return jQuery;
       }
 
       return Util.findShadowRoot(element.parentNode);
+    },
+    jQueryDetection: function jQueryDetection() {
+      if (typeof $ === 'undefined') {
+        throw new TypeError('Bootstrap\'s JavaScript requires jQuery. jQuery must be included before Bootstrap\'s JavaScript.');
+      }
+
+      var version = $.fn.jquery.split(' ')[0].split('.');
+      var minMajor = 1;
+      var ltMajor = 2;
+      var minMinor = 9;
+      var minPatch = 1;
+      var maxMajor = 4;
+
+      if (version[0] < ltMajor && version[1] < minMinor || version[0] === minMajor && version[1] === minMinor && version[2] < minPatch || version[0] >= maxMajor) {
+        throw new Error('Bootstrap\'s JavaScript requires at least jQuery v1.9.1 but less than v4.0.0');
+      }
     }
   };
+  Util.jQueryDetection();
   setTransitionEndSupport();
 
   /**
@@ -10829,7 +10861,7 @@ return jQuery;
    */
 
   var NAME = 'alert';
-  var VERSION = '4.3.1';
+  var VERSION = '4.4.1';
   var DATA_KEY = 'bs.alert';
   var EVENT_KEY = "." + DATA_KEY;
   var DATA_API_KEY = '.data-api';
@@ -10846,13 +10878,12 @@ return jQuery;
     ALERT: 'alert',
     FADE: 'fade',
     SHOW: 'show'
-    /**
-     * ------------------------------------------------------------------------
-     * Class Definition
-     * ------------------------------------------------------------------------
-     */
-
   };
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
 
   var Alert =
   /*#__PURE__*/
@@ -10994,7 +11025,7 @@ return jQuery;
    */
 
   var NAME$1 = 'button';
-  var VERSION$1 = '4.3.1';
+  var VERSION$1 = '4.4.1';
   var DATA_KEY$1 = 'bs.button';
   var EVENT_KEY$1 = "." + DATA_KEY$1;
   var DATA_API_KEY$1 = '.data-api';
@@ -11006,21 +11037,23 @@ return jQuery;
   };
   var Selector$1 = {
     DATA_TOGGLE_CARROT: '[data-toggle^="button"]',
-    DATA_TOGGLE: '[data-toggle="buttons"]',
+    DATA_TOGGLES: '[data-toggle="buttons"]',
+    DATA_TOGGLE: '[data-toggle="button"]',
+    DATA_TOGGLES_BUTTONS: '[data-toggle="buttons"] .btn',
     INPUT: 'input:not([type="hidden"])',
     ACTIVE: '.active',
     BUTTON: '.btn'
   };
   var Event$1 = {
     CLICK_DATA_API: "click" + EVENT_KEY$1 + DATA_API_KEY$1,
-    FOCUS_BLUR_DATA_API: "focus" + EVENT_KEY$1 + DATA_API_KEY$1 + " " + ("blur" + EVENT_KEY$1 + DATA_API_KEY$1)
-    /**
-     * ------------------------------------------------------------------------
-     * Class Definition
-     * ------------------------------------------------------------------------
-     */
-
+    FOCUS_BLUR_DATA_API: "focus" + EVENT_KEY$1 + DATA_API_KEY$1 + " " + ("blur" + EVENT_KEY$1 + DATA_API_KEY$1),
+    LOAD_DATA_API: "load" + EVENT_KEY$1 + DATA_API_KEY$1
   };
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
 
   var Button =
   /*#__PURE__*/
@@ -11036,7 +11069,7 @@ return jQuery;
     _proto.toggle = function toggle() {
       var triggerChangeEvent = true;
       var addAriaPressed = true;
-      var rootElement = $(this._element).closest(Selector$1.DATA_TOGGLE)[0];
+      var rootElement = $(this._element).closest(Selector$1.DATA_TOGGLES)[0];
 
       if (rootElement) {
         var input = this._element.querySelector(Selector$1.INPUT);
@@ -11052,13 +11085,16 @@ return jQuery;
                 $(activeElement).removeClass(ClassName$1.ACTIVE);
               }
             }
+          } else if (input.type === 'checkbox') {
+            if (this._element.tagName === 'LABEL' && input.checked === this._element.classList.contains(ClassName$1.ACTIVE)) {
+              triggerChangeEvent = false;
+            }
+          } else {
+            // if it's not a radio button or checkbox don't add a pointless/invalid checked property to the input
+            triggerChangeEvent = false;
           }
 
           if (triggerChangeEvent) {
-            if (input.hasAttribute('disabled') || rootElement.hasAttribute('disabled') || input.classList.contains('disabled') || rootElement.classList.contains('disabled')) {
-              return;
-            }
-
             input.checked = !this._element.classList.contains(ClassName$1.ACTIVE);
             $(input).trigger('change');
           }
@@ -11068,12 +11104,14 @@ return jQuery;
         }
       }
 
-      if (addAriaPressed) {
-        this._element.setAttribute('aria-pressed', !this._element.classList.contains(ClassName$1.ACTIVE));
-      }
+      if (!(this._element.hasAttribute('disabled') || this._element.classList.contains('disabled'))) {
+        if (addAriaPressed) {
+          this._element.setAttribute('aria-pressed', !this._element.classList.contains(ClassName$1.ACTIVE));
+        }
 
-      if (triggerChangeEvent) {
-        $(this._element).toggleClass(ClassName$1.ACTIVE);
+        if (triggerChangeEvent) {
+          $(this._element).toggleClass(ClassName$1.ACTIVE);
+        }
       }
     };
 
@@ -11115,17 +11153,57 @@ return jQuery;
 
 
   $(document).on(Event$1.CLICK_DATA_API, Selector$1.DATA_TOGGLE_CARROT, function (event) {
-    event.preventDefault();
     var button = event.target;
 
     if (!$(button).hasClass(ClassName$1.BUTTON)) {
-      button = $(button).closest(Selector$1.BUTTON);
+      button = $(button).closest(Selector$1.BUTTON)[0];
     }
 
-    Button._jQueryInterface.call($(button), 'toggle');
+    if (!button || button.hasAttribute('disabled') || button.classList.contains('disabled')) {
+      event.preventDefault(); // work around Firefox bug #1540995
+    } else {
+      var inputBtn = button.querySelector(Selector$1.INPUT);
+
+      if (inputBtn && (inputBtn.hasAttribute('disabled') || inputBtn.classList.contains('disabled'))) {
+        event.preventDefault(); // work around Firefox bug #1540995
+
+        return;
+      }
+
+      Button._jQueryInterface.call($(button), 'toggle');
+    }
   }).on(Event$1.FOCUS_BLUR_DATA_API, Selector$1.DATA_TOGGLE_CARROT, function (event) {
     var button = $(event.target).closest(Selector$1.BUTTON)[0];
     $(button).toggleClass(ClassName$1.FOCUS, /^focus(in)?$/.test(event.type));
+  });
+  $(window).on(Event$1.LOAD_DATA_API, function () {
+    // ensure correct active class is set to match the controls' actual values/states
+    // find all checkboxes/readio buttons inside data-toggle groups
+    var buttons = [].slice.call(document.querySelectorAll(Selector$1.DATA_TOGGLES_BUTTONS));
+
+    for (var i = 0, len = buttons.length; i < len; i++) {
+      var button = buttons[i];
+      var input = button.querySelector(Selector$1.INPUT);
+
+      if (input.checked || input.hasAttribute('checked')) {
+        button.classList.add(ClassName$1.ACTIVE);
+      } else {
+        button.classList.remove(ClassName$1.ACTIVE);
+      }
+    } // find all button toggles
+
+
+    buttons = [].slice.call(document.querySelectorAll(Selector$1.DATA_TOGGLE));
+
+    for (var _i = 0, _len = buttons.length; _i < _len; _i++) {
+      var _button = buttons[_i];
+
+      if (_button.getAttribute('aria-pressed') === 'true') {
+        _button.classList.add(ClassName$1.ACTIVE);
+      } else {
+        _button.classList.remove(ClassName$1.ACTIVE);
+      }
+    }
   });
   /**
    * ------------------------------------------------------------------------
@@ -11148,7 +11226,7 @@ return jQuery;
    */
 
   var NAME$2 = 'carousel';
-  var VERSION$2 = '4.3.1';
+  var VERSION$2 = '4.4.1';
   var DATA_KEY$2 = 'bs.carousel';
   var EVENT_KEY$2 = "." + DATA_KEY$2;
   var DATA_API_KEY$2 = '.data-api';
@@ -11221,13 +11299,12 @@ return jQuery;
   var PointerType = {
     TOUCH: 'touch',
     PEN: 'pen'
-    /**
-     * ------------------------------------------------------------------------
-     * Class Definition
-     * ------------------------------------------------------------------------
-     */
-
   };
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
 
   var Carousel =
   /*#__PURE__*/
@@ -11347,7 +11424,7 @@ return jQuery;
     ;
 
     _proto._getConfig = function _getConfig(config) {
-      config = _objectSpread({}, Default, config);
+      config = _objectSpread2({}, Default, {}, config);
       Util.typeCheckConfig(NAME$2, config, DefaultType);
       return config;
     };
@@ -11359,7 +11436,8 @@ return jQuery;
         return;
       }
 
-      var direction = absDeltax / this.touchDeltaX; // swipe left
+      var direction = absDeltax / this.touchDeltaX;
+      this.touchDeltaX = 0; // swipe left
 
       if (direction > 0) {
         this.prev();
@@ -11485,8 +11563,6 @@ return jQuery;
           event.preventDefault();
           this.next();
           break;
-
-        default:
       }
     };
 
@@ -11638,10 +11714,10 @@ return jQuery;
       return this.each(function () {
         var data = $(this).data(DATA_KEY$2);
 
-        var _config = _objectSpread({}, Default, $(this).data());
+        var _config = _objectSpread2({}, Default, {}, $(this).data());
 
         if (typeof config === 'object') {
-          _config = _objectSpread({}, _config, config);
+          _config = _objectSpread2({}, _config, {}, config);
         }
 
         var action = typeof config === 'string' ? config : _config.slide;
@@ -11679,7 +11755,7 @@ return jQuery;
         return;
       }
 
-      var config = _objectSpread({}, $(target).data(), $(this).data());
+      var config = _objectSpread2({}, $(target).data(), {}, $(this).data());
 
       var slideIndex = this.getAttribute('data-slide-to');
 
@@ -11748,7 +11824,7 @@ return jQuery;
    */
 
   var NAME$3 = 'collapse';
-  var VERSION$3 = '4.3.1';
+  var VERSION$3 = '4.4.1';
   var DATA_KEY$3 = 'bs.collapse';
   var EVENT_KEY$3 = "." + DATA_KEY$3;
   var DATA_API_KEY$3 = '.data-api';
@@ -11781,13 +11857,12 @@ return jQuery;
   var Selector$3 = {
     ACTIVES: '.show, .collapsing',
     DATA_TOGGLE: '[data-toggle="collapse"]'
-    /**
-     * ------------------------------------------------------------------------
-     * Class Definition
-     * ------------------------------------------------------------------------
-     */
-
   };
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
 
   var Collapse =
   /*#__PURE__*/
@@ -11974,7 +12049,7 @@ return jQuery;
     ;
 
     _proto._getConfig = function _getConfig(config) {
-      config = _objectSpread({}, Default$1, config);
+      config = _objectSpread2({}, Default$1, {}, config);
       config.toggle = Boolean(config.toggle); // Coerce string values
 
       Util.typeCheckConfig(NAME$3, config, DefaultType$1);
@@ -12028,7 +12103,7 @@ return jQuery;
         var $this = $(this);
         var data = $this.data(DATA_KEY$3);
 
-        var _config = _objectSpread({}, Default$1, $this.data(), typeof config === 'object' && config ? config : {});
+        var _config = _objectSpread2({}, Default$1, {}, $this.data(), {}, typeof config === 'object' && config ? config : {});
 
         if (!data && _config.toggle && /show|hide/.test(config)) {
           _config.toggle = false;
@@ -12103,7 +12178,7 @@ return jQuery;
 
   /**!
    * @fileOverview Kickass library to create and place poppers near their reference elements.
-   * @version 1.14.7
+   * @version 1.16.0
    * @license
    * Copyright (c) 2016 Federico Zivolo and contributors
    *
@@ -12125,16 +12200,17 @@ return jQuery;
    * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    * SOFTWARE.
    */
-  var isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+  var isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined' && typeof navigator !== 'undefined';
 
-  var longerTimeoutBrowsers = ['Edge', 'Trident', 'Firefox'];
-  var timeoutDuration = 0;
-  for (var i = 0; i < longerTimeoutBrowsers.length; i += 1) {
-    if (isBrowser && navigator.userAgent.indexOf(longerTimeoutBrowsers[i]) >= 0) {
-      timeoutDuration = 1;
-      break;
+  var timeoutDuration = function () {
+    var longerTimeoutBrowsers = ['Edge', 'Trident', 'Firefox'];
+    for (var i = 0; i < longerTimeoutBrowsers.length; i += 1) {
+      if (isBrowser && navigator.userAgent.indexOf(longerTimeoutBrowsers[i]) >= 0) {
+        return 1;
+      }
     }
-  }
+    return 0;
+  }();
 
   function microtaskDebounce(fn) {
     var called = false;
@@ -12252,6 +12328,17 @@ return jQuery;
     }
 
     return getScrollParent(getParentNode(element));
+  }
+
+  /**
+   * Returns the reference node of the reference object, or the reference object itself.
+   * @method
+   * @memberof Popper.Utils
+   * @param {Element|Object} reference - the reference element (the popper will be relative to this)
+   * @returns {Element} parent
+   */
+  function getReferenceNode(reference) {
+    return reference && reference.referenceNode ? reference.referenceNode : reference;
   }
 
   var isIE11 = isBrowser && !!(window.MSInputMethodContext && document.documentMode);
@@ -12562,8 +12649,8 @@ return jQuery;
 
     // subtract scrollbar size from sizes
     var sizes = element.nodeName === 'HTML' ? getWindowSizes(element.ownerDocument) : {};
-    var width = sizes.width || element.clientWidth || result.right - result.left;
-    var height = sizes.height || element.clientHeight || result.bottom - result.top;
+    var width = sizes.width || element.clientWidth || result.width;
+    var height = sizes.height || element.clientHeight || result.height;
 
     var horizScrollbar = element.offsetWidth - width;
     var vertScrollbar = element.offsetHeight - height;
@@ -12715,7 +12802,7 @@ return jQuery;
     // NOTE: 1 DOM access here
 
     var boundaries = { top: 0, left: 0 };
-    var offsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, reference);
+    var offsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, getReferenceNode(reference));
 
     // Handle viewport case
     if (boundariesElement === 'viewport') {
@@ -12843,7 +12930,7 @@ return jQuery;
   function getReferenceOffsets(state, popper, reference) {
     var fixedPosition = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
 
-    var commonOffsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, reference);
+    var commonOffsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, getReferenceNode(reference));
     return getOffsetRectRelativeToArbitraryNode(reference, commonOffsetParent, fixedPosition);
   }
 
@@ -13105,7 +13192,7 @@ return jQuery;
 
     this.disableEventListeners();
 
-    // remove the popper if user explicity asked for the deletion on destroy
+    // remove the popper if user explicitly asked for the deletion on destroy
     // do not use `remove` because IE11 doesn't support it
     if (this.options.removeOnDestroy) {
       this.popper.parentNode.removeChild(this.popper);
@@ -13707,7 +13794,14 @@ return jQuery;
 
       // flip the variation if required
       var isVertical = ['top', 'bottom'].indexOf(placement) !== -1;
-      var flippedVariation = !!options.flipVariations && (isVertical && variation === 'start' && overflowsLeft || isVertical && variation === 'end' && overflowsRight || !isVertical && variation === 'start' && overflowsTop || !isVertical && variation === 'end' && overflowsBottom);
+
+      // flips variation if reference element overflows boundaries
+      var flippedVariationByRef = !!options.flipVariations && (isVertical && variation === 'start' && overflowsLeft || isVertical && variation === 'end' && overflowsRight || !isVertical && variation === 'start' && overflowsTop || !isVertical && variation === 'end' && overflowsBottom);
+
+      // flips variation if popper content overflows boundaries
+      var flippedVariationByContent = !!options.flipVariationsByContent && (isVertical && variation === 'start' && overflowsRight || isVertical && variation === 'end' && overflowsLeft || !isVertical && variation === 'start' && overflowsBottom || !isVertical && variation === 'end' && overflowsTop);
+
+      var flippedVariation = flippedVariationByRef || flippedVariationByContent;
 
       if (overlapsRef || overflowsBoundaries || flippedVariation) {
         // this boolean to detect any flip loop
@@ -14314,7 +14408,23 @@ return jQuery;
        * The popper will never be placed outside of the defined boundaries
        * (except if `keepTogether` is enabled)
        */
-      boundariesElement: 'viewport'
+      boundariesElement: 'viewport',
+      /**
+       * @prop {Boolean} flipVariations=false
+       * The popper will switch placement variation between `-start` and `-end` when
+       * the reference element overlaps its boundaries.
+       *
+       * The original placement should have a set variation.
+       */
+      flipVariations: false,
+      /**
+       * @prop {Boolean} flipVariationsByContent=false
+       * The popper will switch placement variation between `-start` and `-end` when
+       * the popper element overlaps its reference boundaries.
+       *
+       * The original placement should have a set variation.
+       */
+      flipVariationsByContent: false
     },
 
     /**
@@ -14531,8 +14641,8 @@ return jQuery;
     /**
      * Creates a new Popper.js instance.
      * @class Popper
-     * @param {HTMLElement|referenceObject} reference - The reference element used to position the popper
-     * @param {HTMLElement} popper - The HTML element used as the popper
+     * @param {Element|referenceObject} reference - The reference element used to position the popper
+     * @param {Element} popper - The HTML / XML element used as the popper
      * @param {Object} options - Your custom options to override the ones defined in [Defaults](#defaults)
      * @return {Object} instance - The generated Popper.js instance
      */
@@ -14687,7 +14797,7 @@ return jQuery;
    */
 
   var NAME$4 = 'dropdown';
-  var VERSION$4 = '4.3.1';
+  var VERSION$4 = '4.4.1';
   var DATA_KEY$4 = 'bs.dropdown';
   var EVENT_KEY$4 = "." + DATA_KEY$4;
   var DATA_API_KEY$4 = '.data-api';
@@ -14747,21 +14857,22 @@ return jQuery;
     flip: true,
     boundary: 'scrollParent',
     reference: 'toggle',
-    display: 'dynamic'
+    display: 'dynamic',
+    popperConfig: null
   };
   var DefaultType$2 = {
     offset: '(number|string|function)',
     flip: 'boolean',
     boundary: '(string|element)',
     reference: '(string|element)',
-    display: 'string'
-    /**
-     * ------------------------------------------------------------------------
-     * Class Definition
-     * ------------------------------------------------------------------------
-     */
-
+    display: 'string',
+    popperConfig: '(null|object)'
   };
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
 
   var Dropdown =
   /*#__PURE__*/
@@ -14785,8 +14896,6 @@ return jQuery;
         return;
       }
 
-      var parent = Dropdown._getParentFromElement(this._element);
-
       var isActive = $(this._menu).hasClass(ClassName$4.SHOW);
 
       Dropdown._clearMenus();
@@ -14795,10 +14904,25 @@ return jQuery;
         return;
       }
 
+      this.show(true);
+    };
+
+    _proto.show = function show(usePopper) {
+      if (usePopper === void 0) {
+        usePopper = false;
+      }
+
+      if (this._element.disabled || $(this._element).hasClass(ClassName$4.DISABLED) || $(this._menu).hasClass(ClassName$4.SHOW)) {
+        return;
+      }
+
       var relatedTarget = {
         relatedTarget: this._element
       };
       var showEvent = $.Event(Event$4.SHOW, relatedTarget);
+
+      var parent = Dropdown._getParentFromElement(this._element);
+
       $(parent).trigger(showEvent);
 
       if (showEvent.isDefaultPrevented()) {
@@ -14806,7 +14930,7 @@ return jQuery;
       } // Disable totally Popper.js for Dropdown in Navbar
 
 
-      if (!this._inNavbar) {
+      if (!this._inNavbar && usePopper) {
         /**
          * Check for Popper dependency
          * Popper - https://popper.js.org
@@ -14853,28 +14977,6 @@ return jQuery;
       $(parent).toggleClass(ClassName$4.SHOW).trigger($.Event(Event$4.SHOWN, relatedTarget));
     };
 
-    _proto.show = function show() {
-      if (this._element.disabled || $(this._element).hasClass(ClassName$4.DISABLED) || $(this._menu).hasClass(ClassName$4.SHOW)) {
-        return;
-      }
-
-      var relatedTarget = {
-        relatedTarget: this._element
-      };
-      var showEvent = $.Event(Event$4.SHOW, relatedTarget);
-
-      var parent = Dropdown._getParentFromElement(this._element);
-
-      $(parent).trigger(showEvent);
-
-      if (showEvent.isDefaultPrevented()) {
-        return;
-      }
-
-      $(this._menu).toggleClass(ClassName$4.SHOW);
-      $(parent).toggleClass(ClassName$4.SHOW).trigger($.Event(Event$4.SHOWN, relatedTarget));
-    };
-
     _proto.hide = function hide() {
       if (this._element.disabled || $(this._element).hasClass(ClassName$4.DISABLED) || !$(this._menu).hasClass(ClassName$4.SHOW)) {
         return;
@@ -14891,6 +14993,10 @@ return jQuery;
 
       if (hideEvent.isDefaultPrevented()) {
         return;
+      }
+
+      if (this._popper) {
+        this._popper.destroy();
       }
 
       $(this._menu).toggleClass(ClassName$4.SHOW);
@@ -14931,7 +15037,7 @@ return jQuery;
     };
 
     _proto._getConfig = function _getConfig(config) {
-      config = _objectSpread({}, this.constructor.Default, $(this._element).data(), config);
+      config = _objectSpread2({}, this.constructor.Default, {}, $(this._element).data(), {}, config);
       Util.typeCheckConfig(NAME$4, config, this.constructor.DefaultType);
       return config;
     };
@@ -14980,7 +15086,7 @@ return jQuery;
 
       if (typeof this._config.offset === 'function') {
         offset.fn = function (data) {
-          data.offsets = _objectSpread({}, data.offsets, _this2._config.offset(data.offsets, _this2._element) || {});
+          data.offsets = _objectSpread2({}, data.offsets, {}, _this2._config.offset(data.offsets, _this2._element) || {});
           return data;
         };
       } else {
@@ -15001,9 +15107,8 @@ return jQuery;
           preventOverflow: {
             boundariesElement: this._config.boundary
           }
-        } // Disable Popper.js if we have a static display
-
-      };
+        }
+      }; // Disable Popper.js if we have a static display
 
       if (this._config.display === 'static') {
         popperConfig.modifiers.applyStyle = {
@@ -15011,7 +15116,7 @@ return jQuery;
         };
       }
 
-      return popperConfig;
+      return _objectSpread2({}, popperConfig, {}, this._config.popperConfig);
     } // Static
     ;
 
@@ -15083,6 +15188,11 @@ return jQuery;
         }
 
         toggles[i].setAttribute('aria-expanded', 'false');
+
+        if (context._popper) {
+          context._popper.destroy();
+        }
+
         $(dropdownMenu).removeClass(ClassName$4.SHOW);
         $(parent).removeClass(ClassName$4.SHOW).trigger($.Event(Event$4.HIDDEN, relatedTarget));
       }
@@ -15123,6 +15233,10 @@ return jQuery;
 
       var isActive = $(parent).hasClass(ClassName$4.SHOW);
 
+      if (!isActive && event.which === ESCAPE_KEYCODE) {
+        return;
+      }
+
       if (!isActive || isActive && (event.which === ESCAPE_KEYCODE || event.which === SPACE_KEYCODE)) {
         if (event.which === ESCAPE_KEYCODE) {
           var toggle = parent.querySelector(Selector$4.DATA_TOGGLE);
@@ -15133,7 +15247,9 @@ return jQuery;
         return;
       }
 
-      var items = [].slice.call(parent.querySelectorAll(Selector$4.VISIBLE_ITEMS));
+      var items = [].slice.call(parent.querySelectorAll(Selector$4.VISIBLE_ITEMS)).filter(function (item) {
+        return $(item).is(':visible');
+      });
 
       if (items.length === 0) {
         return;
@@ -15213,7 +15329,7 @@ return jQuery;
    */
 
   var NAME$5 = 'modal';
-  var VERSION$5 = '4.3.1';
+  var VERSION$5 = '4.4.1';
   var DATA_KEY$5 = 'bs.modal';
   var EVENT_KEY$5 = "." + DATA_KEY$5;
   var DATA_API_KEY$5 = '.data-api';
@@ -15234,6 +15350,7 @@ return jQuery;
   };
   var Event$5 = {
     HIDE: "hide" + EVENT_KEY$5,
+    HIDE_PREVENTED: "hidePrevented" + EVENT_KEY$5,
     HIDDEN: "hidden" + EVENT_KEY$5,
     SHOW: "show" + EVENT_KEY$5,
     SHOWN: "shown" + EVENT_KEY$5,
@@ -15251,7 +15368,8 @@ return jQuery;
     BACKDROP: 'modal-backdrop',
     OPEN: 'modal-open',
     FADE: 'fade',
-    SHOW: 'show'
+    SHOW: 'show',
+    STATIC: 'modal-static'
   };
   var Selector$5 = {
     DIALOG: '.modal-dialog',
@@ -15260,13 +15378,12 @@ return jQuery;
     DATA_DISMISS: '[data-dismiss="modal"]',
     FIXED_CONTENT: '.fixed-top, .fixed-bottom, .is-fixed, .sticky-top',
     STICKY_CONTENT: '.sticky-top'
-    /**
-     * ------------------------------------------------------------------------
-     * Class Definition
-     * ------------------------------------------------------------------------
-     */
-
   };
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
 
   var Modal =
   /*#__PURE__*/
@@ -15412,15 +15529,40 @@ return jQuery;
     ;
 
     _proto._getConfig = function _getConfig(config) {
-      config = _objectSpread({}, Default$3, config);
+      config = _objectSpread2({}, Default$3, {}, config);
       Util.typeCheckConfig(NAME$5, config, DefaultType$3);
       return config;
     };
 
-    _proto._showElement = function _showElement(relatedTarget) {
+    _proto._triggerBackdropTransition = function _triggerBackdropTransition() {
       var _this3 = this;
 
+      if (this._config.backdrop === 'static') {
+        var hideEventPrevented = $.Event(Event$5.HIDE_PREVENTED);
+        $(this._element).trigger(hideEventPrevented);
+
+        if (hideEventPrevented.defaultPrevented) {
+          return;
+        }
+
+        this._element.classList.add(ClassName$5.STATIC);
+
+        var modalTransitionDuration = Util.getTransitionDurationFromElement(this._element);
+        $(this._element).one(Util.TRANSITION_END, function () {
+          _this3._element.classList.remove(ClassName$5.STATIC);
+        }).emulateTransitionEnd(modalTransitionDuration);
+
+        this._element.focus();
+      } else {
+        this.hide();
+      }
+    };
+
+    _proto._showElement = function _showElement(relatedTarget) {
+      var _this4 = this;
+
       var transition = $(this._element).hasClass(ClassName$5.FADE);
+      var modalBody = this._dialog ? this._dialog.querySelector(Selector$5.MODAL_BODY) : null;
 
       if (!this._element.parentNode || this._element.parentNode.nodeType !== Node.ELEMENT_NODE) {
         // Don't move modal's DOM position
@@ -15433,8 +15575,8 @@ return jQuery;
 
       this._element.setAttribute('aria-modal', true);
 
-      if ($(this._dialog).hasClass(ClassName$5.SCROLLABLE)) {
-        this._dialog.querySelector(Selector$5.MODAL_BODY).scrollTop = 0;
+      if ($(this._dialog).hasClass(ClassName$5.SCROLLABLE) && modalBody) {
+        modalBody.scrollTop = 0;
       } else {
         this._element.scrollTop = 0;
       }
@@ -15454,12 +15596,12 @@ return jQuery;
       });
 
       var transitionComplete = function transitionComplete() {
-        if (_this3._config.focus) {
-          _this3._element.focus();
+        if (_this4._config.focus) {
+          _this4._element.focus();
         }
 
-        _this3._isTransitioning = false;
-        $(_this3._element).trigger(shownEvent);
+        _this4._isTransitioning = false;
+        $(_this4._element).trigger(shownEvent);
       };
 
       if (transition) {
@@ -15471,25 +15613,23 @@ return jQuery;
     };
 
     _proto._enforceFocus = function _enforceFocus() {
-      var _this4 = this;
+      var _this5 = this;
 
       $(document).off(Event$5.FOCUSIN) // Guard against infinite focus loop
       .on(Event$5.FOCUSIN, function (event) {
-        if (document !== event.target && _this4._element !== event.target && $(_this4._element).has(event.target).length === 0) {
-          _this4._element.focus();
+        if (document !== event.target && _this5._element !== event.target && $(_this5._element).has(event.target).length === 0) {
+          _this5._element.focus();
         }
       });
     };
 
     _proto._setEscapeEvent = function _setEscapeEvent() {
-      var _this5 = this;
+      var _this6 = this;
 
       if (this._isShown && this._config.keyboard) {
         $(this._element).on(Event$5.KEYDOWN_DISMISS, function (event) {
           if (event.which === ESCAPE_KEYCODE$1) {
-            event.preventDefault();
-
-            _this5.hide();
+            _this6._triggerBackdropTransition();
           }
         });
       } else if (!this._isShown) {
@@ -15498,11 +15638,11 @@ return jQuery;
     };
 
     _proto._setResizeEvent = function _setResizeEvent() {
-      var _this6 = this;
+      var _this7 = this;
 
       if (this._isShown) {
         $(window).on(Event$5.RESIZE, function (event) {
-          return _this6.handleUpdate(event);
+          return _this7.handleUpdate(event);
         });
       } else {
         $(window).off(Event$5.RESIZE);
@@ -15510,7 +15650,7 @@ return jQuery;
     };
 
     _proto._hideModal = function _hideModal() {
-      var _this7 = this;
+      var _this8 = this;
 
       this._element.style.display = 'none';
 
@@ -15523,11 +15663,11 @@ return jQuery;
       this._showBackdrop(function () {
         $(document.body).removeClass(ClassName$5.OPEN);
 
-        _this7._resetAdjustments();
+        _this8._resetAdjustments();
 
-        _this7._resetScrollbar();
+        _this8._resetScrollbar();
 
-        $(_this7._element).trigger(Event$5.HIDDEN);
+        $(_this8._element).trigger(Event$5.HIDDEN);
       });
     };
 
@@ -15539,7 +15679,7 @@ return jQuery;
     };
 
     _proto._showBackdrop = function _showBackdrop(callback) {
-      var _this8 = this;
+      var _this9 = this;
 
       var animate = $(this._element).hasClass(ClassName$5.FADE) ? ClassName$5.FADE : '';
 
@@ -15553,8 +15693,8 @@ return jQuery;
 
         $(this._backdrop).appendTo(document.body);
         $(this._element).on(Event$5.CLICK_DISMISS, function (event) {
-          if (_this8._ignoreBackdropClick) {
-            _this8._ignoreBackdropClick = false;
+          if (_this9._ignoreBackdropClick) {
+            _this9._ignoreBackdropClick = false;
             return;
           }
 
@@ -15562,11 +15702,7 @@ return jQuery;
             return;
           }
 
-          if (_this8._config.backdrop === 'static') {
-            _this8._element.focus();
-          } else {
-            _this8.hide();
-          }
+          _this9._triggerBackdropTransition();
         });
 
         if (animate) {
@@ -15590,7 +15726,7 @@ return jQuery;
         $(this._backdrop).removeClass(ClassName$5.SHOW);
 
         var callbackRemove = function callbackRemove() {
-          _this8._removeBackdrop();
+          _this9._removeBackdrop();
 
           if (callback) {
             callback();
@@ -15637,7 +15773,7 @@ return jQuery;
     };
 
     _proto._setScrollbar = function _setScrollbar() {
-      var _this9 = this;
+      var _this10 = this;
 
       if (this._isBodyOverflowing) {
         // Note: DOMNode.style.paddingRight returns the actual value or '' if not set
@@ -15648,13 +15784,13 @@ return jQuery;
         $(fixedContent).each(function (index, element) {
           var actualPadding = element.style.paddingRight;
           var calculatedPadding = $(element).css('padding-right');
-          $(element).data('padding-right', actualPadding).css('padding-right', parseFloat(calculatedPadding) + _this9._scrollbarWidth + "px");
+          $(element).data('padding-right', actualPadding).css('padding-right', parseFloat(calculatedPadding) + _this10._scrollbarWidth + "px");
         }); // Adjust sticky content margin
 
         $(stickyContent).each(function (index, element) {
           var actualMargin = element.style.marginRight;
           var calculatedMargin = $(element).css('margin-right');
-          $(element).data('margin-right', actualMargin).css('margin-right', parseFloat(calculatedMargin) - _this9._scrollbarWidth + "px");
+          $(element).data('margin-right', actualMargin).css('margin-right', parseFloat(calculatedMargin) - _this10._scrollbarWidth + "px");
         }); // Adjust body padding
 
         var actualPadding = document.body.style.paddingRight;
@@ -15703,7 +15839,7 @@ return jQuery;
       return this.each(function () {
         var data = $(this).data(DATA_KEY$5);
 
-        var _config = _objectSpread({}, Default$3, $(this).data(), typeof config === 'object' && config ? config : {});
+        var _config = _objectSpread2({}, Default$3, {}, $(this).data(), {}, typeof config === 'object' && config ? config : {});
 
         if (!data) {
           data = new Modal(this, _config);
@@ -15744,7 +15880,7 @@ return jQuery;
 
 
   $(document).on(Event$5.CLICK_DATA_API, Selector$5.DATA_TOGGLE, function (event) {
-    var _this10 = this;
+    var _this11 = this;
 
     var target;
     var selector = Util.getSelectorFromElement(this);
@@ -15753,7 +15889,7 @@ return jQuery;
       target = document.querySelector(selector);
     }
 
-    var config = $(target).data(DATA_KEY$5) ? 'toggle' : _objectSpread({}, $(target).data(), $(this).data());
+    var config = $(target).data(DATA_KEY$5) ? 'toggle' : _objectSpread2({}, $(target).data(), {}, $(this).data());
 
     if (this.tagName === 'A' || this.tagName === 'AREA') {
       event.preventDefault();
@@ -15766,8 +15902,8 @@ return jQuery;
       }
 
       $target.one(Event$5.HIDDEN, function () {
-        if ($(_this10).is(':visible')) {
-          _this10.focus();
+        if ($(_this11).is(':visible')) {
+          _this11.focus();
         }
       });
     });
@@ -15790,7 +15926,7 @@ return jQuery;
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap (v4.3.1): tools/sanitizer.js
+   * Bootstrap (v4.4.1): tools/sanitizer.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
    * --------------------------------------------------------------------------
    */
@@ -15828,13 +15964,13 @@ return jQuery;
     strong: [],
     u: [],
     ul: []
-    /**
-     * A pattern that recognizes a commonly useful subset of URLs that are safe.
-     *
-     * Shoutout to Angular 7 https://github.com/angular/angular/blob/7.2.4/packages/core/src/sanitization/url_sanitizer.ts
-     */
-
   };
+  /**
+   * A pattern that recognizes a commonly useful subset of URLs that are safe.
+   *
+   * Shoutout to Angular 7 https://github.com/angular/angular/blob/7.2.4/packages/core/src/sanitization/url_sanitizer.ts
+   */
+
   var SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
   /**
    * A pattern that matches safe data URLs. Only matches image, video and audio types.
@@ -15901,7 +16037,7 @@ return jQuery;
     };
 
     for (var i = 0, len = elements.length; i < len; i++) {
-      var _ret = _loop(i, len);
+      var _ret = _loop(i);
 
       if (_ret === "continue") continue;
     }
@@ -15916,7 +16052,7 @@ return jQuery;
    */
 
   var NAME$6 = 'tooltip';
-  var VERSION$6 = '4.3.1';
+  var VERSION$6 = '4.4.1';
   var DATA_KEY$6 = 'bs.tooltip';
   var EVENT_KEY$6 = "." + DATA_KEY$6;
   var JQUERY_NO_CONFLICT$6 = $.fn[NAME$6];
@@ -15938,7 +16074,8 @@ return jQuery;
     boundary: '(string|element)',
     sanitize: 'boolean',
     sanitizeFn: '(null|function)',
-    whiteList: 'object'
+    whiteList: 'object',
+    popperConfig: '(null|object)'
   };
   var AttachmentMap$1 = {
     AUTO: 'auto',
@@ -15962,7 +16099,8 @@ return jQuery;
     boundary: 'scrollParent',
     sanitize: true,
     sanitizeFn: null,
-    whiteList: DefaultWhitelist
+    whiteList: DefaultWhitelist,
+    popperConfig: null
   };
   var HoverState = {
     SHOW: 'show',
@@ -15994,22 +16132,17 @@ return jQuery;
     FOCUS: 'focus',
     CLICK: 'click',
     MANUAL: 'manual'
-    /**
-     * ------------------------------------------------------------------------
-     * Class Definition
-     * ------------------------------------------------------------------------
-     */
-
   };
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
 
   var Tooltip =
   /*#__PURE__*/
   function () {
     function Tooltip(element, config) {
-      /**
-       * Check for Popper dependency
-       * Popper - https://popper.js.org
-       */
       if (typeof Popper === 'undefined') {
         throw new TypeError('Bootstrap\'s tooltips require Popper.js (https://popper.js.org/)');
       } // private
@@ -16080,7 +16213,7 @@ return jQuery;
       clearTimeout(this._timeout);
       $.removeData(this.element, this.constructor.DATA_KEY);
       $(this.element).off(this.constructor.EVENT_KEY);
-      $(this.element).closest('.modal').off('hide.bs.modal');
+      $(this.element).closest('.modal').off('hide.bs.modal', this._hideModalHandler);
 
       if (this.tip) {
         $(this.tip).remove();
@@ -16091,7 +16224,7 @@ return jQuery;
       this._hoverState = null;
       this._activeTrigger = null;
 
-      if (this._popper !== null) {
+      if (this._popper) {
         this._popper.destroy();
       }
 
@@ -16144,29 +16277,7 @@ return jQuery;
         }
 
         $(this.element).trigger(this.constructor.Event.INSERTED);
-        this._popper = new Popper(this.element, tip, {
-          placement: attachment,
-          modifiers: {
-            offset: this._getOffset(),
-            flip: {
-              behavior: this.config.fallbackPlacement
-            },
-            arrow: {
-              element: Selector$6.ARROW
-            },
-            preventOverflow: {
-              boundariesElement: this.config.boundary
-            }
-          },
-          onCreate: function onCreate(data) {
-            if (data.originalPlacement !== data.placement) {
-              _this._handlePopperPlacementChange(data);
-            }
-          },
-          onUpdate: function onUpdate(data) {
-            return _this._handlePopperPlacementChange(data);
-          }
-        });
+        this._popper = new Popper(this.element, tip, this._getPopperConfig(attachment));
         $(tip).addClass(ClassName$6.SHOW); // If this is a touch-enabled device we add extra
         // empty mouseover listeners to the body's immediate children;
         // only needed because of broken event delegation on iOS
@@ -16314,14 +16425,43 @@ return jQuery;
     } // Private
     ;
 
-    _proto._getOffset = function _getOffset() {
+    _proto._getPopperConfig = function _getPopperConfig(attachment) {
       var _this3 = this;
+
+      var defaultBsConfig = {
+        placement: attachment,
+        modifiers: {
+          offset: this._getOffset(),
+          flip: {
+            behavior: this.config.fallbackPlacement
+          },
+          arrow: {
+            element: Selector$6.ARROW
+          },
+          preventOverflow: {
+            boundariesElement: this.config.boundary
+          }
+        },
+        onCreate: function onCreate(data) {
+          if (data.originalPlacement !== data.placement) {
+            _this3._handlePopperPlacementChange(data);
+          }
+        },
+        onUpdate: function onUpdate(data) {
+          return _this3._handlePopperPlacementChange(data);
+        }
+      };
+      return _objectSpread2({}, defaultBsConfig, {}, this.config.popperConfig);
+    };
+
+    _proto._getOffset = function _getOffset() {
+      var _this4 = this;
 
       var offset = {};
 
       if (typeof this.config.offset === 'function') {
         offset.fn = function (data) {
-          data.offsets = _objectSpread({}, data.offsets, _this3.config.offset(data.offsets, _this3.element) || {});
+          data.offsets = _objectSpread2({}, data.offsets, {}, _this4.config.offset(data.offsets, _this4.element) || {});
           return data;
         };
       } else {
@@ -16348,32 +16488,35 @@ return jQuery;
     };
 
     _proto._setListeners = function _setListeners() {
-      var _this4 = this;
+      var _this5 = this;
 
       var triggers = this.config.trigger.split(' ');
       triggers.forEach(function (trigger) {
         if (trigger === 'click') {
-          $(_this4.element).on(_this4.constructor.Event.CLICK, _this4.config.selector, function (event) {
-            return _this4.toggle(event);
+          $(_this5.element).on(_this5.constructor.Event.CLICK, _this5.config.selector, function (event) {
+            return _this5.toggle(event);
           });
         } else if (trigger !== Trigger.MANUAL) {
-          var eventIn = trigger === Trigger.HOVER ? _this4.constructor.Event.MOUSEENTER : _this4.constructor.Event.FOCUSIN;
-          var eventOut = trigger === Trigger.HOVER ? _this4.constructor.Event.MOUSELEAVE : _this4.constructor.Event.FOCUSOUT;
-          $(_this4.element).on(eventIn, _this4.config.selector, function (event) {
-            return _this4._enter(event);
-          }).on(eventOut, _this4.config.selector, function (event) {
-            return _this4._leave(event);
+          var eventIn = trigger === Trigger.HOVER ? _this5.constructor.Event.MOUSEENTER : _this5.constructor.Event.FOCUSIN;
+          var eventOut = trigger === Trigger.HOVER ? _this5.constructor.Event.MOUSELEAVE : _this5.constructor.Event.FOCUSOUT;
+          $(_this5.element).on(eventIn, _this5.config.selector, function (event) {
+            return _this5._enter(event);
+          }).on(eventOut, _this5.config.selector, function (event) {
+            return _this5._leave(event);
           });
-        }
-      });
-      $(this.element).closest('.modal').on('hide.bs.modal', function () {
-        if (_this4.element) {
-          _this4.hide();
         }
       });
 
+      this._hideModalHandler = function () {
+        if (_this5.element) {
+          _this5.hide();
+        }
+      };
+
+      $(this.element).closest('.modal').on('hide.bs.modal', this._hideModalHandler);
+
       if (this.config.selector) {
-        this.config = _objectSpread({}, this.config, {
+        this.config = _objectSpread2({}, this.config, {
           trigger: 'manual',
           selector: ''
         });
@@ -16473,7 +16616,7 @@ return jQuery;
           delete dataAttributes[dataAttr];
         }
       });
-      config = _objectSpread({}, this.constructor.Default, dataAttributes, typeof config === 'object' && config ? config : {});
+      config = _objectSpread2({}, this.constructor.Default, {}, dataAttributes, {}, typeof config === 'object' && config ? config : {});
 
       if (typeof config.delay === 'number') {
         config.delay = {
@@ -16633,21 +16776,21 @@ return jQuery;
    */
 
   var NAME$7 = 'popover';
-  var VERSION$7 = '4.3.1';
+  var VERSION$7 = '4.4.1';
   var DATA_KEY$7 = 'bs.popover';
   var EVENT_KEY$7 = "." + DATA_KEY$7;
   var JQUERY_NO_CONFLICT$7 = $.fn[NAME$7];
   var CLASS_PREFIX$1 = 'bs-popover';
   var BSCLS_PREFIX_REGEX$1 = new RegExp("(^|\\s)" + CLASS_PREFIX$1 + "\\S+", 'g');
 
-  var Default$5 = _objectSpread({}, Tooltip.Default, {
+  var Default$5 = _objectSpread2({}, Tooltip.Default, {
     placement: 'right',
     trigger: 'click',
     content: '',
     template: '<div class="popover" role="tooltip">' + '<div class="arrow"></div>' + '<h3 class="popover-header"></h3>' + '<div class="popover-body"></div></div>'
   });
 
-  var DefaultType$5 = _objectSpread({}, Tooltip.DefaultType, {
+  var DefaultType$5 = _objectSpread2({}, Tooltip.DefaultType, {
     content: '(string|element|function)'
   });
 
@@ -16670,13 +16813,12 @@ return jQuery;
     FOCUSOUT: "focusout" + EVENT_KEY$7,
     MOUSEENTER: "mouseenter" + EVENT_KEY$7,
     MOUSELEAVE: "mouseleave" + EVENT_KEY$7
-    /**
-     * ------------------------------------------------------------------------
-     * Class Definition
-     * ------------------------------------------------------------------------
-     */
-
   };
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
 
   var Popover =
   /*#__PURE__*/
@@ -16820,7 +16962,7 @@ return jQuery;
    */
 
   var NAME$8 = 'scrollspy';
-  var VERSION$8 = '4.3.1';
+  var VERSION$8 = '4.4.1';
   var DATA_KEY$8 = 'bs.scrollspy';
   var EVENT_KEY$8 = "." + DATA_KEY$8;
   var DATA_API_KEY$6 = '.data-api';
@@ -16859,13 +17001,12 @@ return jQuery;
   var OffsetMethod = {
     OFFSET: 'offset',
     POSITION: 'position'
-    /**
-     * ------------------------------------------------------------------------
-     * Class Definition
-     * ------------------------------------------------------------------------
-     */
-
   };
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
 
   var ScrollSpy =
   /*#__PURE__*/
@@ -16947,7 +17088,7 @@ return jQuery;
     ;
 
     _proto._getConfig = function _getConfig(config) {
-      config = _objectSpread({}, Default$6, typeof config === 'object' && config ? config : {});
+      config = _objectSpread2({}, Default$6, {}, typeof config === 'object' && config ? config : {});
 
       if (typeof config.target !== 'string') {
         var id = $(config.target).attr('id');
@@ -17127,7 +17268,7 @@ return jQuery;
    */
 
   var NAME$9 = 'tab';
-  var VERSION$9 = '4.3.1';
+  var VERSION$9 = '4.4.1';
   var DATA_KEY$9 = 'bs.tab';
   var EVENT_KEY$9 = "." + DATA_KEY$9;
   var DATA_API_KEY$7 = '.data-api';
@@ -17154,13 +17295,12 @@ return jQuery;
     DATA_TOGGLE: '[data-toggle="tab"], [data-toggle="pill"], [data-toggle="list"]',
     DROPDOWN_TOGGLE: '.dropdown-toggle',
     DROPDOWN_ACTIVE_CHILD: '> .dropdown-menu .active'
-    /**
-     * ------------------------------------------------------------------------
-     * Class Definition
-     * ------------------------------------------------------------------------
-     */
-
   };
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
 
   var Tab =
   /*#__PURE__*/
@@ -17362,7 +17502,7 @@ return jQuery;
    */
 
   var NAME$a = 'toast';
-  var VERSION$a = '4.3.1';
+  var VERSION$a = '4.4.1';
   var DATA_KEY$a = 'bs.toast';
   var EVENT_KEY$a = "." + DATA_KEY$a;
   var JQUERY_NO_CONFLICT$a = $.fn[NAME$a];
@@ -17391,13 +17531,12 @@ return jQuery;
   };
   var Selector$a = {
     DATA_DISMISS: '[data-dismiss="toast"]'
-    /**
-     * ------------------------------------------------------------------------
-     * Class Definition
-     * ------------------------------------------------------------------------
-     */
-
   };
+  /**
+   * ------------------------------------------------------------------------
+   * Class Definition
+   * ------------------------------------------------------------------------
+   */
 
   var Toast =
   /*#__PURE__*/
@@ -17417,7 +17556,12 @@ return jQuery;
     _proto.show = function show() {
       var _this = this;
 
-      $(this._element).trigger(Event$a.SHOW);
+      var showEvent = $.Event(Event$a.SHOW);
+      $(this._element).trigger(showEvent);
+
+      if (showEvent.isDefaultPrevented()) {
+        return;
+      }
 
       if (this._config.animation) {
         this._element.classList.add(ClassName$a.FADE);
@@ -17431,11 +17575,15 @@ return jQuery;
         $(_this._element).trigger(Event$a.SHOWN);
 
         if (_this._config.autohide) {
-          _this.hide();
+          _this._timeout = setTimeout(function () {
+            _this.hide();
+          }, _this._config.delay);
         }
       };
 
       this._element.classList.remove(ClassName$a.HIDE);
+
+      Util.reflow(this._element);
 
       this._element.classList.add(ClassName$a.SHOWING);
 
@@ -17447,22 +17595,19 @@ return jQuery;
       }
     };
 
-    _proto.hide = function hide(withoutTimeout) {
-      var _this2 = this;
-
+    _proto.hide = function hide() {
       if (!this._element.classList.contains(ClassName$a.SHOW)) {
         return;
       }
 
-      $(this._element).trigger(Event$a.HIDE);
+      var hideEvent = $.Event(Event$a.HIDE);
+      $(this._element).trigger(hideEvent);
 
-      if (withoutTimeout) {
-        this._close();
-      } else {
-        this._timeout = setTimeout(function () {
-          _this2._close();
-        }, this._config.delay);
+      if (hideEvent.isDefaultPrevented()) {
+        return;
       }
+
+      this._close();
     };
 
     _proto.dispose = function dispose() {
@@ -17481,26 +17626,26 @@ return jQuery;
     ;
 
     _proto._getConfig = function _getConfig(config) {
-      config = _objectSpread({}, Default$7, $(this._element).data(), typeof config === 'object' && config ? config : {});
+      config = _objectSpread2({}, Default$7, {}, $(this._element).data(), {}, typeof config === 'object' && config ? config : {});
       Util.typeCheckConfig(NAME$a, config, this.constructor.DefaultType);
       return config;
     };
 
     _proto._setListeners = function _setListeners() {
-      var _this3 = this;
+      var _this2 = this;
 
       $(this._element).on(Event$a.CLICK_DISMISS, Selector$a.DATA_DISMISS, function () {
-        return _this3.hide(true);
+        return _this2.hide();
       });
     };
 
     _proto._close = function _close() {
-      var _this4 = this;
+      var _this3 = this;
 
       var complete = function complete() {
-        _this4._element.classList.add(ClassName$a.HIDE);
+        _this3._element.classList.add(ClassName$a.HIDE);
 
-        $(_this4._element).trigger(Event$a.HIDDEN);
+        $(_this3._element).trigger(Event$a.HIDDEN);
       };
 
       this._element.classList.remove(ClassName$a.SHOW);
@@ -17570,31 +17715,6 @@ return jQuery;
     return Toast._jQueryInterface;
   };
 
-  /**
-   * --------------------------------------------------------------------------
-   * Bootstrap (v4.3.1): index.js
-   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-   * --------------------------------------------------------------------------
-   */
-
-  (function () {
-    if (typeof $ === 'undefined') {
-      throw new TypeError('Bootstrap\'s JavaScript requires jQuery. jQuery must be included before Bootstrap\'s JavaScript.');
-    }
-
-    var version = $.fn.jquery.split(' ')[0].split('.');
-    var minMajor = 1;
-    var ltMajor = 2;
-    var minMinor = 9;
-    var minPatch = 1;
-    var maxMajor = 4;
-
-    if (version[0] < ltMajor && version[1] < minMinor || version[0] === minMajor && version[1] === minMinor && version[2] < minPatch || version[0] >= maxMajor) {
-      throw new Error('Bootstrap\'s JavaScript requires at least jQuery v1.9.1 but less than v4.0.0');
-    }
-  })();
-
-  exports.Util = Util;
   exports.Alert = Alert;
   exports.Button = Button;
   exports.Carousel = Carousel;
@@ -17606,10 +17726,11 @@ return jQuery;
   exports.Tab = Tab;
   exports.Toast = Toast;
   exports.Tooltip = Tooltip;
+  exports.Util = Util;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));
 //# sourceMappingURL=bootstrap.bundle.js.map
 
 ;
@@ -23724,6 +23845,135 @@ if (typeof define === 'function' && define.amd) {
 })(window, document, 'Hammer');
 
 ;
+/****************************************************************************
+	history.js,
+
+	(c) 2019, FCOO
+
+	https://github.com/FCOO/history.js
+	https://github.com/FCOO
+
+****************************************************************************/
+
+(function ($/*, window, document, undefined*/) {
+	"use strict";
+
+	var ns = window;
+
+	function HistoryList( options, plugin_count) {
+		this.plugin_count = plugin_count;
+
+		this.options = $.extend({
+			//Default options
+
+
+            initValue: null, //Any item or list of items to initialize the list = first item
+            action   : function(/* item, historyList */){
+                         //function to be called when a item is poped from the list using goFirst, goBack, goForward or goLast
+                     },
+
+            onUpdate : function(/*backwardAvail, forwardAvail, historyList*/){
+                          //Called when the list is updated.
+                          //backwardAvail [BOOLEAN] true if it is possible to go backwards
+                          //forwardAvail [BOOLEAN] true if it is possible to go forwards
+                       }
+
+        }, options || {} );
+
+        this.list = [];
+        this.index = -1;
+        this.lastIndex = -1;
+        this.addToList = true;
+        this.callAction = true;
+
+        if (options.initValue){
+            options.initValue = $.isArray(options.initValue) ? options.initValue : [options.initValue];
+            var _this = this;
+            $.each( options.initValue, function(index, item){
+                _this.callAction = false;
+                _this.add(item);
+            });
+        }
+
+        this._callOnUpdate();
+	}
+
+    // expose access to the constructor
+    ns.HistoryList = HistoryList;
+
+    //Extend the prototype
+	ns.HistoryList.prototype = {
+
+        add: function( item ){
+            if (this.addToList){
+                this.index++;
+                this.list.splice(this.index);
+                this.list.push(item);
+                this.lastIndex = this.list.length-1;
+            }
+
+            if (this.callAction){
+                this.callAction = false; //Prevent recursion
+                this.addToList = false;
+                this.options.action( item, this );
+                this._callOnUpdate();
+            }
+            this.callAction = true;
+            this.addToList = true;
+            return this;
+        },
+
+
+        _callOnUpdate: function(){
+            this.options.onUpdate( this.index>0, this.lastIndex > this.index, this);
+            return this;
+        },
+
+        _goto: function( deltaIndex ){
+            this.index = this.index + deltaIndex;
+            this.addToList = false;
+            return this.add( this.list[this.index] );
+        },
+
+        goFirst: function() {
+            return this.index > 0 ? this._goto(-1*this.index) : this;
+        },
+
+
+        goBack: function() {
+            return this.index > 0 ? this._goto(-1) : this;
+        },
+
+        goForward: function() {
+            return this.index < this.lastIndex ? this._goto(+1) : this;
+        },
+
+        goLast: function() {
+            return this.lastIndex > this.index ? this._goto(this.lastIndex-this.index) : this;
+        },
+
+        clearHistory: function() {
+            if (this.index > 0){
+                this.list.splice(0, this.index);
+                this.index = 0;
+                this.lastIndex = this.list.length - 1;
+                this._callOnUpdate();
+            }
+            return this;
+        },
+
+        clearFuture: function() {
+            if (this.lastIndex > this.index){
+                this.list.splice(this.index+1);
+                this.lastIndex = this.index;
+                this._callOnUpdate();
+            }
+            return this;
+        },
+
+    };
+}(jQuery, this, document));
+;
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
@@ -24410,7 +24660,9 @@ if (typeof define === 'function' && define.amd) {
 
         if (!options) options = {}; // non valid keys handling
 
-        if (keys === undefined || keys === null) return '';
+        if (keys === undefined || keys === null
+        /* || keys === ''*/
+        ) return '';
         if (!Array.isArray(keys)) keys = [String(keys)]; // separators
 
         var keySeparator = options.keySeparator !== undefined ? options.keySeparator : this.options.keySeparator; // get namespace(s)
@@ -25552,7 +25804,10 @@ if (typeof define === 'function' && define.amd) {
         if (this.services.utils && this.services.utils.hasLoadedNamespace && !this.services.utils.hasLoadedNamespace(namespace)) {
           this.logger.warn("did not save key \"".concat(key, "\" for namespace \"").concat(namespace, "\" as the namespace was not yet loaded"), 'This means something IS WRONG in your application setup. You access the t function before i18next.init / i18next.loadNamespace / i18next.changeLanguage was done. Wait for the callback or Promise to resolve before accessing it!!!');
           return;
-        }
+        } // ignore non valid keys
+
+
+        if (key === undefined || key === null || key === '') return;
 
         if (this.backend && this.backend.create) {
           this.backend.create(languages, namespace, key, fallbackValue, null
@@ -33521,7 +33776,7 @@ if (typeof define === 'function' && define.amd) {
  * 
  */
 /**
- * bluebird build version 3.7.1
+ * bluebird build version 3.7.2
  * Features enabled: core, race, call_get, generators, map, nodeify, promisify, props, reduce, settle, some, using, timers, filter, any, each
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Promise=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof _dereq_=="function"&&_dereq_;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof _dereq_=="function"&&_dereq_;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
@@ -34170,37 +34425,10 @@ var deferUnhandledRejectionCheck;
         promises.length = 0;
     }
 
-    if (typeof document === "object" && document.createElement) {
-        deferUnhandledRejectionCheck = (function() {
-            var iframeSetTimeout;
-
-            function checkIframe() {
-                if (document.body) {
-                    var iframe = document.createElement("iframe");
-                    document.body.appendChild(iframe);
-                    if (iframe.contentWindow &&
-                        iframe.contentWindow.setTimeout) {
-                        iframeSetTimeout = iframe.contentWindow.setTimeout;
-                    }
-                    document.body.removeChild(iframe);
-                }
-            }
-            checkIframe();
-            return function(promise) {
-                promises.push(promise);
-                if (iframeSetTimeout) {
-                    iframeSetTimeout(unhandledRejectionCheck, 1);
-                } else {
-                    checkIframe();
-                }
-            };
-        })();
-    } else {
-        deferUnhandledRejectionCheck = function(promise) {
-            promises.push(promise);
-            setTimeout(unhandledRejectionCheck, 1);
-        };
-    }
+    deferUnhandledRejectionCheck = function(promise) {
+        promises.push(promise);
+        setTimeout(unhandledRejectionCheck, 1);
+    };
 
     es5.defineProperty(Promise, "_unhandledRejectionCheck", {
         value: unhandledRejectionCheck
@@ -37121,7 +37349,7 @@ _dereq_("./synchronous_inspection")(Promise);
 _dereq_("./join")(
     Promise, PromiseArray, tryConvertToPromise, INTERNAL, async);
 Promise.Promise = Promise;
-Promise.version = "3.7.1";
+Promise.version = "3.7.2";
 _dereq_('./call_get.js')(Promise);
 _dereq_('./generators.js')(Promise, apiRejection, INTERNAL, tryConvertToPromise, Proxyable, debug);
 _dereq_('./map.js')(Promise, PromiseArray, apiRejection, tryConvertToPromise, INTERNAL, debug);
@@ -50989,19 +51217,28 @@ options:
 	};
 
     //*********************************************************************
-    //jQuery.fn.vfValue( value ): Sets the value of the selected elements and update them
+    //jQuery.fn.vfValue( value ):
+    //(value[,options]): Sets the value of the selected elements and update them
+    //(): Return the raw value
 	$.fn.vfValue = function( value, options ) {
-        if (options)
-            this.vfOptions( options, true );
-		return this.each(function() {
-            var $this = $(this),
-                format = $this._vfGetFormat(),
-                options = $this._vfGetOptions();
-
-            $this
-                .attr( 'data-'+dataId_value, JSON.stringify( format.convert( value, options ) ) )
-                ._vfUpdate();
-		});
+        if (arguments.length){
+            if (options)
+                this.vfOptions( options, true );
+                return this.each(function() {
+                var $this = $(this),
+                    format = $this._vfGetFormat(),
+                    options = $this._vfGetOptions();
+                $this
+                    .attr( 'data-'+dataId_value, JSON.stringify( format.convert( value, options ) ) )
+                    ._vfUpdate();
+            });
+        }
+        else {
+            var format = this._vfGetFormat(),
+            _options = this._vfGetOptions(),
+            rawValue = JSON.parse( this.attr( 'data-'+dataId_value ) || '""');
+            return format ? format.convertBack( rawValue, _options ) : rawValue;
+        }
 	};
 
     //*********************************************************************
@@ -55341,6 +55578,7 @@ module.exports = g;
             buttons       : [],     //Extra button between
             static        : true,   //Only close modal-form on (X)
             formValidation: false,  //When true: make room for formValidation messages
+            closeWithoutWarning: false, //When true the form can close without warning for not-saved changes
         };
 
 
@@ -55502,12 +55740,18 @@ module.exports = g;
         showOrHide: function( values ){
             if (this.options.showWhen || this.options.hideWhen){
                 var show = !this.options.showWhen; //If showWhen is given default is false = not show
-                $.each( this.options.hideWhen || {}, function( userId, value ){
-                    if (values[userId] == value)
+                $.each( this.options.hideWhen || {}, function( userId, hideValue ){
+                    var value = values[userId];
+                    if ( ( $.isArray(hideValue) && (hideValue.indexOf(value) != -1)) ||
+                         (!$.isArray(hideValue) && (hideValue == value))
+                       )
                         show = false;
                 });
-                $.each( this.options.showWhen || {}, function( userId, value ){
-                    if (values[userId] == value)
+                $.each( this.options.showWhen || {}, function( userId, showValue ){
+                    var value = values[userId];
+                    if ( ( $.isArray(showValue) && (showValue.indexOf(value) != -1)) ||
+                         (!$.isArray(showValue) && (showValue == value))
+                       )
                         show = true;
                 });
 
@@ -55658,7 +55902,6 @@ module.exports = g;
                 this.$bsModal.bsSelectTab(tabIndexOrId);
 
             this.setValues( values, false, true );
-
             this.originalValues = this.getValues();
 
             //Reset validation
@@ -55694,6 +55937,13 @@ module.exports = g;
             //Check if any of the new values are different from the original ones
             if (!this.isDifferent(this.originalValues)){
                 this.options.onClose_user();
+                return true;
+            }
+
+            if (this.options.closeWithoutWarning){
+                this.originalValues = this.getValues();
+                if (this.options.onCancel)
+                    this.options.onCancel(this.originalValues);
                 return true;
             }
 
@@ -56673,6 +56923,7 @@ options
         closeIcon
         closeText
         noCloseIconOnHeader
+        historyList         - The modal gets backward and forward icons in header to go backward and forward in the historyList. See demo and https://github.com/fcoo/history.js
 
     **********************************************************/
     var modalId = 0,
@@ -56759,8 +57010,6 @@ options
         //Close all popover
         $('.popover.show').popover('hide');
 
-        var $this = $(this);
-
         openModals++;
 
         //Move up the backdrop
@@ -56770,16 +57019,19 @@ options
         $._bsNotyAddLayer();
 
         //Move the modal to the front
-        $this._setModalBackdropZIndex();
+        this._setModalBackdropZIndex();
 
         //Prevent the modal from closing with esc if there are a modal noty
-        $(this).keydown( function( event ){
+        this.keydown( function( event ){
             if (window._bsNotyModal){
                 window._bsNotyModal.close();
                 event.stopImmediatePropagation();
                 return false;
             }
         });
+
+        if (this.onShow)
+            this.onShow(this);
     }
 
     //******************************************************
@@ -56849,7 +57101,7 @@ options
             this._bsModalCloseElements();
 
             //If onClose exists => call and check
-            if (this.onClose && !this.onClose())
+            if (this.onClose && !this.onClose(this))
                 return false;
 
             //If pinable and pinned => unpin
@@ -56876,6 +57128,47 @@ options
 
         setHeaderIconDisabled: function(id){
             this.setHeaderIconEnabled(id, true);
+        },
+
+        /******************************************************
+        update
+        Empty and replace the content of the header, content, fixed-content, footer and
+        extended-content, extended-fixed-content, extended-footer and
+        minimized-content, minimized-fixed-content, minimized-footer
+        Note:
+        The type of content must have been difined in the original modal-options.
+        Meaning that no new type can be added
+        ******************************************************/
+        update: function( options ){
+            var _this = this;
+            //***********************************************************
+            function updateElement( $element, newOptions, methodName, param ){
+                if ($element && newOptions){
+                    $element.empty();
+                    $element[methodName](newOptions, param);
+                }
+            }
+            //***********************************************************
+
+            //Update header
+            var $iconContainer = this.bsModal.$header.find('.header-icon-container').detach();
+            updateElement(this.bsModal.$header, options, '_bsHeaderAndIcons');
+            this.bsModal.$header.append($iconContainer);
+
+            //Update the tree size-contents
+            $.each([null, 'minimized', 'extended'], function(index, id){
+                var containers     = id ? _this.bsModal[id] : _this.bsModal,
+                    contentOptions = id ? options[id]       : options;
+
+                if (containers && contentOptions){
+                    updateElement( containers.$fixedContent, contentOptions.fixedContent, '_bsAddHtml',       true );
+                    updateElement( containers.$content,      contentOptions.content,      '_bsAppendContent', contentOptions.contentContext );
+                    updateElement( containers.$footer,       contentOptions.footer === true ? '' : contentOptions.footer,       '_bsAddHtml' );
+                }
+            });
+
+
+            return this;
         }
 
     };
@@ -56902,15 +57195,17 @@ options
         }
 
         //Append fixed content (if any)
-        var $modalFixedContent = parts.$fixedContent =
+        //options.fixedContentOptions = options different from content for fixed-content
+        var fixedOptions = $.extend({}, options, options.fixedContentOptions || {}),
+            $modalFixedContent = parts.$fixedContent =
                 $('<div/>')
                     .addClass('modal-body-fixed')
                     .toggleClass(className, !noClassNameForFixed)
                     .addClass(scrollbarClass )
-                    .toggleClass('no-vertical-padding', !!options.noVerticalPadding)
-                    .toggleClass('no-horizontal-padding', !!options.noHorizontalPadding)
-                    .toggleClass('modal-body-semi-transparent', !!options.semiTransparent)
-                    .toggleClass('modal-type-' + options.type, !!options.type)
+                    .toggleClass('no-vertical-padding',         !!/*options*/fixedOptions.noVerticalPadding)
+                    .toggleClass('no-horizontal-padding',       !!/*options*/fixedOptions.noHorizontalPadding)
+                    .toggleClass('modal-body-semi-transparent', !!/*options*/fixedOptions.semiTransparent)
+                    .toggleClass('modal-type-' + options.type,  !!/*options*/fixedOptions.type)
                     .addClass(options.fixedClassName || '')
                     .appendTo( this );
         if (options.fixedContent)
@@ -56921,10 +57216,10 @@ options
                 $('<div/>')
                     .addClass('modal-body ' + className)
                     .toggleClass('modal-body-always-max-height', !!options.alwaysMaxHeight)
-                    .toggleClass('no-vertical-padding', !!options.noVerticalPadding)
-                    .toggleClass('no-horizontal-padding', !!options.noHorizontalPadding)
-                    .toggleClass('modal-body-semi-transparent', !!options.semiTransparent)
-                    .toggleClass('modal-type-' + options.type, !!options.type)
+                    .toggleClass('no-vertical-padding',          !!options.noVerticalPadding)
+                    .toggleClass('no-horizontal-padding',        !!options.noHorizontalPadding)
+                    .toggleClass('modal-body-semi-transparent',  !!options.semiTransparent)
+                    .toggleClass('modal-type-' + options.type,   !!options.type)
                     .addClass(options.className || '')
                     .appendTo( this );
 
@@ -56965,128 +57260,6 @@ options
         }
 
         return this;
-    };
-
-
-    function get$modalContent( $elem ){
-        var bsModal = $elem.bsModal || $elem;
-        return bsModal.$modalContent || $elem;
-    }
-
-    /******************************************************
-    _bsModalSetSizeClass(size) - Set the class-name according to size
-    ******************************************************/
-    $.fn._bsModalSetSizeClass = function(size){
-        return get$modalContent(this)
-                   .modernizrToggle('modal-minimized', size == MODAL_SIZE_MINIMIZED )
-                   .modernizrToggle('modal-normal',    size == MODAL_SIZE_NORMAL)
-                   .modernizrToggle('modal-extended',  size == MODAL_SIZE_EXTENDED );
-    };
-
-    $.fn._bsModalGetSize = function(){
-        var $modalContent = get$modalContent(this);
-        return $modalContent.hasClass('modal-minimized') ?
-                   MODAL_SIZE_MINIMIZED :
-               $modalContent.hasClass('modal-normal') ?
-                   MODAL_SIZE_NORMAL :
-                   MODAL_SIZE_EXTENDED;
-    };
-
-    /******************************************************
-    _bsModalSetHeightAndWidth - Set the height and width according to current cssHeight and cssWidth
-    ******************************************************/
-    $.fn._bsModalSetHeightAndWidth = function(){
-        var bsModal = this.bsModal,
-            $modalContent = get$modalContent(this),
-            $modalDialog = $modalContent.parent(),
-            size = $modalContent._bsModalGetSize(),
-            cssHeight = bsModal.cssHeight[size],
-            cssWidth = bsModal.cssWidth[size];
-
-        //Set height
-        $modalContent
-            .toggleClass('modal-fixed-height', !!cssHeight)
-            .toggleClass('modal-flex-height', !cssHeight)
-            .css( cssHeight ? cssHeight : {height: 'auto', maxHeight: null});
-        if (!cssHeight)
-            adjustModalMaxHeight( $modalContent );
-
-        //Set width
-        $modalDialog
-            .toggleClass('modal-flex-width', cssWidth.flexWidth )
-            .toggleClass('modal-extra-width', cssWidth.extraWidth )
-            .toggleClass('modal-mega-width', cssWidth.megaWidth )
-            .css('width', cssWidth.width ? cssWidth.width : '' );
-
-        //Call onChange (if any)
-        if (bsModal.onChange)
-            bsModal.onChange( bsModal );
-    };
-
-    /******************************************************
-    _bsModalExtend, _bsModalDiminish, _bsModalToggleHeight,
-    _bsModalSetSize, _bsModalToggleMinimizedHeader
-    Methods to change extended-mode
-    ******************************************************/
-    $.fn._bsModalExtend = function(){
-        return this._bsModalSetSize( this._bsModalGetSize() == MODAL_SIZE_MINIMIZED ? MODAL_SIZE_NORMAL : MODAL_SIZE_EXTENDED);
-    };
-
-    $.fn._bsModalDiminish = function(){
-        return this._bsModalSetSize( this._bsModalGetSize() == MODAL_SIZE_EXTENDED ? MODAL_SIZE_NORMAL : MODAL_SIZE_MINIMIZED);
-    };
-
-    //Shift between normal and extended size
-    //minimized -> normal, extended -> normal, normal -> extended (if any) else -> minimized
-    $.fn._bsModalToggleHeight = function(){
-        var newSize = this._bsModalGetSize() == MODAL_SIZE_NORMAL ?
-                        (this.bsModal.sizes & MODAL_SIZE_EXTENDED ? MODAL_SIZE_EXTENDED : MODAL_SIZE_MINIMIZED) :
-                        MODAL_SIZE_NORMAL;
-        this._bsModalSetSize(newSize);
-    };
-
-    //Set new size of modal-window
-    $.fn._bsModalSetSize = function(size){
-        this._bsModalSetSizeClass(size);
-        this._bsModalSetHeightAndWidth();
-        return false; //Prevent onclick-event on header
-    };
-
-    //hid/show header for size = minimized
-    $.fn._bsModalToggleMinimizedHeader = function(){
-        if (this._bsModalGetSize() == MODAL_SIZE_MINIMIZED)
-            get$modalContent(this).toggleClass('modal-minimized-hide-header');
-    };
-
-/* TODO: animate changes in height and width
-       var $this = this.bsModal.$container,
-            oldHeight = $this.outerHeight(),
-            newHeight;
-
-        $this.modernizrToggle('modal-extended');
-
-        newHeight = $this.outerHeight();
-        $this.height(oldHeight);
-
-        $this.animate({height: newHeight}, 'fast', function() { $this.height('auto'); });
-*/
-
-    /******************************************************
-    _bsModalPin, _bsModalUnpin, _bsModalTogglePin
-    Methods to change pinned-status
-    ******************************************************/
-    $.fn._bsModalPin = function(){
-        return this.bsModal.isPinned ? false : this._bsModalTogglePin();
-    };
-    $.fn._bsModalUnpin = function( /*event*/ ){
-        return this.bsModal.isPinned ? this._bsModalTogglePin() : false;
-    };
-    $.fn._bsModalTogglePin = function( /*event*/ ){
-        var $modalContent = this.bsModal.$modalContent;
-        this.bsModal.isPinned = !this.bsModal.isPinned;
-        $modalContent.modernizrToggle('modal-pinned', !!this.bsModal.isPinned);
-
-        return this.bsModal.onPin( this.bsModal.isPinned );
     };
 
 
@@ -57305,20 +57478,20 @@ options
                     modalDiminish :
                     null;
 
-        $modalContent._bsModalBodyAndFooter('normal', options, this.bsModal, noClassNameForFixed, false );
+        $modalContent._bsModalBodyAndFooter('normal', options, this.bsModal, '', noClassNameForFixed, false );
 
         //Create extended content (if any)
         if (options.extended){
             this.bsModal.extended = {};
             if (options.extended.clickable)
                 options.extended.onClick = options.extended.onClick || modalDiminish;
-            $modalContent._bsModalBodyAndFooter( 'extended', options.extended, this.bsModal.extended, false, noClassNameForFooter );
+            $modalContent._bsModalBodyAndFooter( 'extended', options.extended, this.bsModal.extended, '', false, noClassNameForFooter );
         }
 
         //Add buttons (if any). Allways hidden for minimized
         var $modalButtonContainer = this.bsModal.$buttonContainer =
                 $('<div/>')
-                    .addClass('modal-footer hide-for-modal-minimized')
+                    .addClass('modal-footer show-for-no-modal-minimized')
                     .toggleClass('modal-footer-vertical', !!options.verticalButtons)
                     .appendTo( $modalContent ),
             $modalButtons = this.bsModal.$buttons = [],
@@ -57359,6 +57532,148 @@ options
         });
         return this;
     };
+
+
+    /******************************************************
+    *******************************************************
+    Set/change size-mode
+    *******************************************************
+    ******************************************************/
+    function get$modalContent( $elem ){
+        var bsModal = $elem.bsModal || $elem;
+        return bsModal.$modalContent || $elem;
+    }
+
+    /******************************************************
+    _bsModalSetSizeClass(size) - Set the class-name according to size
+    ******************************************************/
+    $.fn._bsModalSetSizeClass = function(size){
+        return get$modalContent(this)
+                   .modernizrToggle('modal-minimized', size == MODAL_SIZE_MINIMIZED )
+                   .modernizrToggle('modal-normal',    size == MODAL_SIZE_NORMAL)
+                   .modernizrToggle('modal-extended',  size == MODAL_SIZE_EXTENDED );
+    };
+
+    $.fn._bsModalGetSize = function(){
+        var $modalContent = get$modalContent(this);
+        return $modalContent.hasClass('modal-minimized') ?
+                   MODAL_SIZE_MINIMIZED :
+               $modalContent.hasClass('modal-normal') ?
+                   MODAL_SIZE_NORMAL :
+                   MODAL_SIZE_EXTENDED;
+    };
+
+    /******************************************************
+    _bsModalSetHeightAndWidth - Set the height and width according to current cssHeight and cssWidth
+    ******************************************************/
+    $.fn._bsModalSetHeightAndWidth = function(){
+        var bsModal = this.bsModal,
+            $modalContent = get$modalContent(this),
+            $modalDialog = $modalContent.parent(),
+            size = $modalContent._bsModalGetSize(),
+            cssHeight = bsModal.cssHeight[size],
+            cssWidth = bsModal.cssWidth[size];
+
+        //Set height
+        $modalContent
+            .toggleClass('modal-fixed-height', !!cssHeight)
+            .toggleClass('modal-flex-height', !cssHeight)
+            .css( cssHeight ? cssHeight : {height: 'auto', maxHeight: null});
+        if (!cssHeight)
+            adjustModalMaxHeight( $modalContent );
+
+        //Set width
+        $modalDialog
+            .toggleClass('modal-flex-width', cssWidth.flexWidth )
+            .toggleClass('modal-extra-width', cssWidth.extraWidth )
+            .toggleClass('modal-mega-width', cssWidth.megaWidth )
+            .css('width', cssWidth.width ? cssWidth.width : '' );
+
+        //Call onChange (if any)
+        if (bsModal.onChange)
+            bsModal.onChange( bsModal );
+    };
+
+    /******************************************************
+    _bsModalExtend, _bsModalDiminish, _bsModalToggleHeight,
+    _bsModalSetSize, _bsModalToggleMinimizedHeader
+    Methods to change extended-mode
+    ******************************************************/
+    $.fn._bsModalExtend = function(){
+        return this._bsModalSetSize( this._bsModalGetSize() == MODAL_SIZE_MINIMIZED ? MODAL_SIZE_NORMAL : MODAL_SIZE_EXTENDED);
+    };
+
+    $.fn._bsModalDiminish = function(){
+        return this._bsModalSetSize( this._bsModalGetSize() == MODAL_SIZE_EXTENDED ? MODAL_SIZE_NORMAL : MODAL_SIZE_MINIMIZED);
+    };
+
+    //Shift between normal and extended size
+    //minimized -> normal, extended -> normal, normal -> extended (if any) else -> minimized
+    $.fn._bsModalToggleHeight = function(){
+        var newSize = this._bsModalGetSize() == MODAL_SIZE_NORMAL ?
+                        (this.bsModal.sizes & MODAL_SIZE_EXTENDED ? MODAL_SIZE_EXTENDED : MODAL_SIZE_MINIMIZED) :
+                        MODAL_SIZE_NORMAL;
+        this._bsModalSetSize(newSize);
+    };
+
+    //Set new size of modal-window
+    $.fn._bsModalSetSize = function(size){
+        this._bsModalSetSizeClass(size);
+        this._bsModalSetHeightAndWidth();
+        return false; //Prevent onclick-event on header
+    };
+
+    //hid/show header for size = minimized
+    $.fn._bsModalToggleMinimizedHeader = function(){
+        if (this._bsModalGetSize() == MODAL_SIZE_MINIMIZED)
+            get$modalContent(this).toggleClass('modal-minimized-hide-header');
+    };
+
+/* TODO: animate changes in height and width
+       var $this = this.bsModal.$container,
+            oldHeight = $this.outerHeight(),
+            newHeight;
+
+        $this.modernizrToggle('modal-extended');
+
+        newHeight = $this.outerHeight();
+        $this.height(oldHeight);
+
+        $this.animate({height: newHeight}, 'fast', function() { $this.height('auto'); });
+*/
+
+    /******************************************************
+    _bsModalPin, _bsModalUnpin, _bsModalTogglePin
+    Methods to change pinned-status
+    ******************************************************/
+    $.fn._bsModalPin = function(){
+        return this.bsModal.isPinned ? false : this._bsModalTogglePin();
+    };
+    $.fn._bsModalUnpin = function( /*event*/ ){
+        return this.bsModal.isPinned ? this._bsModalTogglePin() : false;
+    };
+    $.fn._bsModalTogglePin = function( /*event*/ ){
+        var $modalContent = this.bsModal.$modalContent;
+        this.bsModal.isPinned = !this.bsModal.isPinned;
+        $modalContent.modernizrToggle('modal-pinned', !!this.bsModal.isPinned);
+
+        return this.bsModal.onPin( this.bsModal.isPinned );
+    };
+
+
+
+    //bsModal_updateIcons_historylist - Updates backward- and forward-icons in modal-header according to status of historyList
+    function bsModal_updateIcons_historylist( backAvail, forwardAvail, historyList ){
+        if (historyList.lastIndex <= 0) return;
+
+        //Show icons
+        this.getHeaderIcon('back').css('visibility', 'initial');
+        this.getHeaderIcon('forward').css('visibility', 'initial');
+
+        //Update icons
+        this.setHeaderIconEnabled('back'   , !backAvail );
+        this.setHeaderIconEnabled('forward', !forwardAvail );
+    }
 
     /******************************************************
     bsModal
@@ -57409,9 +57724,19 @@ options
         options.icons = options.icons || {};
         options.icons.close = { onClick: $.proxy( bsModal_prototype.close, $result) };
 
+        //Add backward- and forward-icons and update-function if modal is connected to a historyList
+        if (options.historyList){
+            options.icons.back    = {onClick: function(){ options.historyList.goBack();    }};
+            options.icons.forward = {onClick: function(){ options.historyList.goForward(); }};
+
+            options.historyList.options.onUpdate = $.proxy( bsModal_updateIcons_historylist, $result );
+        }
+
+        //Create modal content
         $modalDialog._bsModalContent( options );
         $result.data('bsModalDialog', $modalDialog);
 
+        $result.onShow = options.onShow;
         $result.onClose = options.onClose;
 
         //Create as modal and adds methods - only allow close by esc for non-static modal (typical a non-form)
@@ -57423,8 +57748,15 @@ options
            show	    :   false                               //  boolean	            true	Shows the modal when initialized.
         });
         $result.bsModal = $modalDialog.bsModal;
+
+        if (options.historyList){
+            //Hide back- and forward-icons
+            $result.getHeaderIcon('back').css('visibility', 'hidden');
+            $result.getHeaderIcon('forward').css('visibility', 'hidden');
+        }
+
         $result.on({
-            'show.bs.modal'  : show_bs_modal,
+            'show.bs.modal'  : $.proxy(show_bs_modal, $result),//show_bs_modal,
             'shown.bs.modal' : shown_bs_modal,
             'hide.bs.modal'  : $.proxy(hide_bs_modal, $result),
             'hidden.bs.modal': hidden_bs_modal,
@@ -57941,12 +58273,22 @@ options
     };
 
 
-    $('body').on("touchstart.jbs.popover mousedown.jbs.popover", function( event ){
-        $.bsPopover_closeAll( function( $this ){
-            // hide any open popover when the click is not inside the body of a popover
-            return (!$this.is(event.target) && $this.has(event.target).length === 0 && $('.popover').has(event.target).length === 0);
+    $('body')
+        .on("touchstart.jbs.popover mousedown.jbs.popover", function( event ){
+            $.bsPopover_closeAll( function( $this ){
+                // hide any open popover when the click is not inside the body of a popover
+//                return (!$this.is(event.target) && (!$this.has(event.target) || $this.has(event.target).length === 0) && (!$('.popover').has(event.target) || $('.popover').has(event.target).length === 0));
+                return (!$this.is(event.target) && $this.has(event.target).length === 0 && $('.popover').has(event.target).length === 0);
+            });
+        })
+        //Close all popover on esc
+		.on('keydown', function( event ){
+            if (event.altKey || event.ctrlKey || event.metaKey)
+                return;
+            if (event.keyCode === 27)
+                $.bsPopover_closeAll();
         });
-    });
+
 
     /***********************************************************
 	Extend the $.fn.popover.Constructor.prototype.setContent to
@@ -58302,7 +58644,7 @@ options
             });
 
             //Set selected item (if any)
-            this.$select.selectpicker('val', this.selectedId ? this.selectedId : null);
+            this.$select.selectpicker('val', this.selectedId ? this.selectedId : undefined);
         },
 
         bsOnRendered: function(){
@@ -58418,6 +58760,7 @@ options
                 $('<option/>')
                     .text(itemOptions.id)
                     .prop('selected', itemOptions.id == options.selectedId)
+                    .prop('title', ' ')  //Must be not-empty
                     .appendTo($currentParent);
             }
             else
@@ -58449,7 +58792,9 @@ options
             .appendTo( $select.parent().find('.filter-option-inner') );
 
         //wrap inside a label
-        var $label = $formControl._wrapLabel({ label: options.label });
+        var $label =
+                $formControl._wrapLabel({ label: options.label })
+                .toggleClass('w-100', !!options.fullWidth);
 
         //Open/close select when click on the label
         $label.on('click', function(event){
@@ -58574,6 +58919,8 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
         sortDefault  : [string or boolean]. false. Possible values = false, true, "asc" or "desc". true => "asc"
         sortHeader   : [boolean] false. If true a header-row is added every time the sorted value changes
 
+        filter       : function(rawValue, colunmOptions) null. Return true if row is included based on single value
+
     }
 
     showHeader          [boolean] true
@@ -58595,10 +58942,44 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
 
     rowClassName      : [] of string. []. Class-names for each row
 
+    rowFilter         : function(rowData, rowId) null. Return true if row is to be included/shown. rowData = {id: value}
+
+
+
     Sorting is done by https://github.com/joequery/Stupid-Table-Plugin
 
 
 *******************************************************************/
+
+    /********************************************************************
+    Different sort-functions for moment-objects: (a,b) return a-b
+    ********************************************************************/
+    function momentSort(m1, m2, startOf){
+        var moment1 = moment(m1),
+            moment2 = moment(m2);
+
+        if (startOf){
+            moment1.startOf(startOf);
+            moment2.startOf(startOf);
+        }
+        return moment1 - moment2;
+    }
+
+    //momentDateSort - sort by date despide the time
+    function momentDateSort(m1, m2){
+        return momentSort(m1, m2, 'day');
+    }
+
+    //momentTimeSort - sort by time despide ther date
+    function momentTimeSort(m1, m2){
+        return momentSort(
+            moment(m1).date(1).month(0).year(2000),
+            moment(m2).date(1).month(0).year(2000)
+        );
+    }
+
+
+
     var defaultOptions = {
             baseClass           : 'table',
             styleClass          : 'fixed',
@@ -58611,8 +58992,14 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
             centerInContainer   : false,
             useTouchSize        : true,
             defaultColunmOptions: {},
-            rowClassName        : []
+            rowClassName        : [],
 
+
+            stupidtable: {
+                'moment'     : momentSort,
+                'moment_date': momentDateSort,
+                'moment_time': momentTimeSort
+            }
         },
 
         defaultColunmOptions = {
@@ -58647,38 +59034,6 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
         return $element;
     }
 
-    /********************************************************************
-    Different sort-functions for moment-objects: (a,b) return a-b
-    ********************************************************************/
-    function momentSort(m1, m2){
-        var moment1 = moment(m1),
-            moment2 = moment(m2);
-        if (moment1.isSame(moment2)) return 0;
-        if (moment1.isBefore(moment2)) return -1;
-        return 1;
-    }
-
-    //momentDateSort - sort by date despide the time
-    function momentDateSort(m1, m2){
-        return momentSort(
-            moment(m1).startOf('day'),
-            moment(m2).startOf('day')
-        );
-    }
-
-    //momentTimeSort - sort by time despide ther date
-    function momentTimeSort(m1, m2){
-        return momentSort(
-            moment(m1).date(1).month(0).year(2000),
-            moment(m2).date(1).month(0).year(2000)
-        );
-    }
-
-    var stupidtableOptions = {
-            'moment'     : momentSort,
-            'moment_date': momentDateSort,
-            'moment_time': momentTimeSort
-        };
 
     /**********************************************************
     Prototype for bsTable
@@ -58704,18 +59059,22 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
             $.each( options.columns, function( index, columnOptions ){
                 var content = rowContent[columnOptions.id],
                     $td = $('<td/>').appendTo($tr);
-
                 adjustThOrTd( $td, columnOptions, !options.showHeader );
 
                 if ($.isPlainObject(content) && content.className)
                     $td.addClass(content.className);
 
-                //Build the content using _bsAppendContent or jquery-value-format
-                if (columnOptions.vfFormat)
-                    $td.vfValueFormat( content, columnOptions.vfFormat, columnOptions.vfOptions );
-                else {
-                    $td._bsAppendContent( content );
+                //Build the content using the createContent-function, _bsAppendContent, or jquery-value-format
+                if (columnOptions.createContent){
+                    columnOptions.createContent( content, $td );
+                    //Save original contant as sort-by-value
+                    $td.data('sort-value', content );
                 }
+                else
+                    if (columnOptions.vfFormat)
+                        $td.vfValueFormat( content, columnOptions.vfFormat, columnOptions.vfOptions );
+                    else
+                        $td._bsAppendContent( content );
             });
 
             //Add rows to radioGroup
@@ -58731,6 +59090,55 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
             return $.isNumeric(idOrIndex) ? this.columns[idOrIndex] : this.columnIds[idOrIndex];
         },
 
+
+
+        /**********************************************************
+        eachRow - Call rowFunc = function($tr, $tdList, sortValueList) for all rows
+        **********************************************************/
+        eachRow: function( rowFunc ){
+            var _this = this;
+
+            this.find('tbody tr').each( function( rowIndex, tr ){
+                var $tr = $(tr),
+                    id = $tr.attr('id'),
+                    $tdList = [],
+                    valueList = [],
+                    values = {};
+
+                $tr.find('td').each(function(index, td){
+                    var $td = $(td);
+                    $tdList.push( $td );
+                });
+
+                //Find the "raw" content eq. before any display adjusting was made
+                $.each($tdList, function( columnIndex, $td ){
+                    var column = _this._getColumn( columnIndex ),
+                        value  = '';
+
+                    //If cell-content is vfFormat-object => Get 'sort-value' from vfFormat
+                    if (column.vfFormat)
+                        value = $td.vfValue();
+                    else
+                        //If cell-content is created using the createContent-function => Get value for data-sort-value
+                        if (column.createContent)
+                            value = $td.data('sort-value');
+                        else
+                            value = $td.text();
+                    valueList.push(value);
+                    values[column.id] = value;
+                });
+
+                rowFunc({
+                    id       : id,
+                    $tr      : $tr,
+                    $tdList  : $tdList,
+                    valueList: valueList,
+                    values   : values
+                });
+            });
+            return this;
+        },
+
         /**********************************************************
         sortBy - Sort the table
         **********************************************************/
@@ -58740,30 +59148,31 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
                 column.$th.stupidsort( dir );
         },
 
+        _resort: function(){
+            this.sortBy( this.lastSortBy.columnIndex, this.lastSortBy.direction );
+        },
+
         /**********************************************************
         beforeTableSort - Called before the table is being sorted by StupidTable
         **********************************************************/
         beforeTableSort: function(event, sortInfo){
             var column          = this._getColumn(sortInfo.column),
-                sortMulticolumn = column.$th.data('sort-multicolumn') || '',
+                sortMulticolumn = column.$th.attr('data-sort-multicolumn') || '',
                 _this           = this;
 
             //Remove all group-header-rows
             this.find('.table-sort-group-header').remove();
 
             //Convert sortMulticolumn to array
-            sortMulticolumn = sortMulticolumn.split(',');
-            sortMulticolumn.push(''+column.index);
+            sortMulticolumn = sortMulticolumn ? sortMulticolumn.split(',') : [];
+            sortMulticolumn.push(column.index);
 
-            $.each( sortMulticolumn, function( dummy, columnIndex ){
-                var column = _this._getColumn( parseInt( columnIndex ) );
-                //If cell-content is vfFormat-object => Set 'sort-value' from vfFormat
-                if (column.vfFormat){
-                    _this.find('td:nth-child('+(column.index+1)+')').each( function( dummy, td ){
-                        var $td = $(td);
-                        $td.data( 'sort-value', $td.data('vf-value') );
-                    });
-                }
+            //Save all vfFormat-values as data-sort-value
+            this.eachRow(function(opt){
+                $.each(sortMulticolumn, function(dummy, columnIndex ){
+                    if (_this._getColumn( columnIndex ).vfFormat)
+                        opt.$tdList[columnIndex].data('sort-value', opt.valueList[columnIndex]);
+                });
             });
         },
 
@@ -58771,6 +59180,11 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
         afterTableSort - Called after the table is being sorted by StupidTable
         **********************************************************/
         afterTableSort: function(event, sortInfo){
+            this.lastSortBy = {
+                    columnIndex: sortInfo.column,
+                    direction  : sortInfo.direction
+            };
+
             //Update the class-names of the cloned <thead>
             var cloneThList = this.$theadClone.find('th');
             this.find('thead th').each( function( index, th ){
@@ -58793,7 +59207,7 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
                 $tdBase.append( $('<span>:</span>') );
 
                 var lastText = "Denne her text kommer sikkert ikke igen";
-                this.find('tbody tr td:nth-child(' + (sortInfo.column+1) +')').each( function( index, td ){
+                this.find('tbody tr:not(.filter-out) td:nth-child(' + (sortInfo.column+1) +')').each( function( index, td ){
                     var $td = $(td),
                         nextText = $td.text();
                     if (nextText != lastText){
@@ -58814,12 +59228,69 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
         },
 
         /**********************************************************
+        resetFilterTable
+        **********************************************************/
+        resetFilterTable: function(dontSort){
+            this.find('tbody tr').removeClass('filter-out');
+            if (!dontSort)
+                this._resort();
+            if (this.setHeaderHeight)
+                this.setHeaderHeight();
+            return this;
+        },
+
+        /**********************************************************
+        filterTable -
+        **********************************************************/
+        filterTable: function( rowF, columnF ){
+            var _this = this,
+                options = $(this).data(dataTableId),
+                rowFilter = rowF || options.rowFilter,
+                columnFilter = {};
+
+            this.resetFilterTable(true);
+
+            //Setting columnFilter = columnF OR columnOptions[].filter
+            if (columnF)
+                columnFilter = columnF;
+            else
+                $.each(this.columnIds, function(id, opt){
+                    if (opt.filter)
+                        columnFilter[id] = opt.filter;
+                });
+
+
+            this.eachRow( function( opt ){
+                var result = true; //Included
+                if (rowFilter)
+                    //Row filter always before column-filter
+                    result = rowFilter(opt.values, opt.id );
+                else {
+                    $.each(columnFilter, function(id, filterFunc){
+                        if (!filterFunc(opt.values[id], _this._getColumn(id))){
+                            result = false;
+                            return false;
+                        }
+                    });
+                }
+                opt.$tr.toggleClass('filter-out', !result);
+            });
+
+            //Sort table again
+            this._resort();
+
+            if (this.setHeaderHeight)
+                this.setHeaderHeight();
+            return this;
+        },
+
+        /**********************************************************
         asModal - display the table in a modal-window with fixed header and scrolling content
         **********************************************************/
         asModal: function( modalOptions ){
             var showHeader = this.find('.no-header').length == 0,
                 _this      = this,
-                $tableWithHeader = null,
+                $tableWithHeader,
                 $result, $thead, count;
 
             if (showHeader){
@@ -58841,8 +59312,6 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
                 count  = 20;
             }
 
-
-
             $result = $.bsModal(
                             $.extend( modalOptions || {}, {
                                 flexWidth        : true,
@@ -58854,7 +59323,7 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
 
             if (showHeader){
                 //Using timeout to wait for the browser to update DOM and get height of the header
-                var setHeaderHeight = function(){
+                var setHeaderHeight = this.setHeaderHeight = function(){
                         var height = $tableWithHeader.outerHeight();
                         if (height <= 0){
                             count--;
@@ -58892,8 +59361,9 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
     /**********************************************************
     bsTable( options ) - create a Bootstrap-table
     **********************************************************/
-    var tableId  = 0,
-        rowId    = 0;
+    var tableId    = 0,
+        rowId      = 0,
+        sortId     = 0;
 
     $.bsTable = function( options ){
 
@@ -58911,6 +59381,7 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
 
         //Adjust each column
         var columnIds = {};
+
         $.each( options.columns, function( index, columnOptions ){
             columnOptions.sortable = columnOptions.sortable || columnOptions.sortBy;
             columnOptions = $.extend( true,
@@ -58925,6 +59396,13 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
 
             columnIds[columnOptions.id] = columnOptions;
             options.columns[index] = columnOptions;
+
+            //If column is sortable and sortBy is a function => add function to options.stupidtable
+            if (columnOptions.sortable && $.isFunction(columnOptions.sortBy)){
+                var stupidtableSortId = 'stupidtableSort'+ sortId++;
+                options.stupidtable[stupidtableSortId] = columnOptions.sortBy;
+                columnOptions.sortBy = stupidtableSortId;
+            }
         });
 
         var id = 'bsTable'+ tableId++,
@@ -58958,6 +59436,8 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
             sortDefaultDir = 'asc',
             multiSortList  = [];
 
+        $table.lastSortBy = {};
+
         /* From https://github.com/joequery/Stupid-Table-Plugin:
             "A multicolumn sort allows you to define secondary columns to sort by in the event of a tie with two elements in the sorted column.
                 Specify a comma-separated list of th identifiers in a data-sort-multicolumn attribute on a <th> element..."
@@ -58966,7 +59446,7 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
         */
         $.each( options.columns, function( index, columnOptions ){
             if (columnOptions.sortable)
-                multiSortList.push( {columnIndex: index, sortIndex: columnOptions.sortIndex });
+                multiSortList.push( {columnId: columnOptions.id, columnIndex: ''+index, sortIndex: columnOptions.sortIndex });
         });
         multiSortList.sort(function( c1, c2){ return c1.sortIndex - c2.sortIndex; });
 
@@ -58992,9 +59472,17 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
                             sortMulticolumn = (sortMulticolumn ? sortMulticolumn + ',' : '') + multiSort.columnIndex;
                     });
 
-                    if (sortMulticolumn)
-                        columnOptions.$th.attr('data-sort-multicolumn', sortMulticolumn);
+                    if (sortMulticolumn){
+                        /*
+                        Bug fix in jquery-stupid-table
+                        if sortMulticolumn == index for one column ("X") => data('sort-multicolumn') return an integer => error in jquery-stupid-table (split not a method for integer)
+                        Solved by setting sortMulticolumn = "X,X" instead of X when only ons column is included
+                        */
+                        if (sortMulticolumn.indexOf(',') == -1)
+                            sortMulticolumn = sortMulticolumn + ',' + sortMulticolumn;
 
+                        columnOptions.$th.attr('data-sort-multicolumn', sortMulticolumn);
+                    }
                     sortableTable = true;
                 }
 
@@ -59020,15 +59508,21 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
             $table.addRow( rowContent );
         });
 
-        if (sortableTable){
-            $table.stupidtable =
-                $table.stupidtable( stupidtableOptions )
-                    .bind('beforetablesort', $.proxy( $table.beforeTableSort, $table ) )
-                    .bind('aftertablesort',  $.proxy( $table.afterTableSort,  $table ) );
 
-            if (sortDefaultId)
+        if (sortableTable){
+            $table.stupidtable( options.stupidtable )
+                .bind('beforetablesort', $.proxy( $table.beforeTableSort, $table ) )
+                .bind('aftertablesort',  $.proxy( $table.afterTableSort,  $table ) );
+
+            if (sortDefaultId, sortDefaultDir)
                 $table.sortBy(sortDefaultId, sortDefaultDir);
         }
+
+
+
+//HER        this.lastSortBy.columnIndex, this.lastSortBy.direction );
+
+
         return $table;
     };
 
@@ -59615,6 +60109,7 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
                 textArray       = getArray( options.text ),
                 vfFormatArray   = getArray( options.vfFormat ),
                 vfValueArray    = getArray( options.vfValue ),
+                i18nextArray    = getArray( options.i18next ),
                 vfOptionsArray  = getArray( options.vfOptions ),
                 textStyleArray  = getArray( options.textStyle ),
                 linkArray       = getArray( ignoreLink ? [] : options.link || options.onClick ),
@@ -59652,7 +60147,7 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
                             if ( ($.type( text ) == "string") && !i18next.exists(text) )
                                 $text.html( text );
                             else
-                                $text.i18n( text, 'html' );
+                                $text.i18n( text, 'html', i18nextArray[ index ] );
                         }
 
                 if (index < textClassArray.length)
@@ -59772,6 +60267,10 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
 //                        case 'xx'               :   buildFunc = $.bsXx;               break;
                     }
                 }
+
+                //Overwrite insideFormGroup if value given in options
+                if ( $.type( options.insideFormGroup ) == "boolean")
+                    insideFormGroup = options.insideFormGroup;
 
                 //Set the parent-element where to append to created element(s)
                 var $parent = this,
