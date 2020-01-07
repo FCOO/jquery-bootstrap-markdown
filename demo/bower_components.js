@@ -17765,6 +17765,11 @@ return jQuery;
                           //Called when the list is updated.
                           //backwardAvail [BOOLEAN] true if it is possible to go backwards
                           //forwardAvail [BOOLEAN] true if it is possible to go forwards
+                       },
+            compare  : function( item1, item2 ){
+                           //Compare two items and return true if the two items are equal
+                           //Can be overwriten for other types of items
+                           return (item1 == item2);
                        }
 
         }, options || {} );
@@ -17794,6 +17799,19 @@ return jQuery;
 	ns.HistoryList.prototype = {
 
         add: function( item ){
+            //Check:
+            if (this.addToList){
+                //1: Is item already the current item on the list => do not add
+                if ( this.list.length && this.options.compare(item, this.list[this.index]) )
+                    this.addToList = false;
+                else
+                    //2: Is item the next item => goForward
+                    if ((this.index < this.lastIndex) &&  this.options.compare(item, this.list[this.index+1]) ) {
+                        this.index++;
+                        this.addToList = false;
+                    }
+            }
+
             if (this.addToList){
                 this.index++;
                 this.list.splice(this.index);
@@ -23876,6 +23894,11 @@ if (typeof define === 'function' && define.amd) {
                           //Called when the list is updated.
                           //backwardAvail [BOOLEAN] true if it is possible to go backwards
                           //forwardAvail [BOOLEAN] true if it is possible to go forwards
+                       },
+            compare  : function( item1, item2 ){
+                           //Compare two items and return true if the two items are equal
+                           //Can be overwriten for other types of items
+                           return (item1 == item2);
                        }
 
         }, options || {} );
@@ -23905,6 +23928,19 @@ if (typeof define === 'function' && define.amd) {
 	ns.HistoryList.prototype = {
 
         add: function( item ){
+            //Check:
+            if (this.addToList){
+                //1: Is item already the current item on the list => do not add
+                if ( this.list.length && this.options.compare(item, this.list[this.index]) )
+                    this.addToList = false;
+                else
+                    //2: Is item the next item => goForward
+                    if ((this.index < this.lastIndex) &&  this.options.compare(item, this.list[this.index+1]) ) {
+                        this.index++;
+                        this.addToList = false;
+                    }
+            }
+
             if (this.addToList){
                 this.index++;
                 this.list.splice(this.index);
@@ -25789,7 +25825,7 @@ if (typeof define === 'function' && define.amd) {
             lng = _name$split4[0],
             ns = _name$split4[1];
 
-        this.read(lng, ns, 'read', null, null, function (err, data) {
+        this.read(lng, ns, 'read', undefined, undefined, function (err, data) {
           if (err) _this5.logger.warn("".concat(prefix, "loading namespace ").concat(ns, " for language ").concat(lng, " failed"), err);
           if (!err && data) _this5.logger.log("".concat(prefix, "loaded namespace ").concat(ns, " for language ").concat(lng), data);
 
@@ -40011,37 +40047,42 @@ module.exports = ret;
 (function ($, window, Promise/*, document, undefined*/) {
     "use strict";
 
-    //Convert a reason to error-object
-    Promise.convertReasonToError = function( reason ){
-        var result = new Error(),
-            response = reason ? reason.response || {} : {};
-
-        result.name    = 'Error';
-        result.message = reason.message || '';
-        result.url     = response.url || '';
-        result.status  = response.status || '';
-        return result;
-    };
-
     //Create a default error-handle. Can be overwritten
-    Promise.defaultErrorHandler = Promise.defaultErrorHandler || function( /* reason, url */ ){};
+    Promise.defaultErrorHandler = Promise.defaultErrorHandler || function( /* error: {name, status, message, text, statusText}  */ ){};
+
+    function createErrorObject( reason, url ){
+        var response = reason.response,
+            text = response ? response.statusText :
+                    reason.message ? reason.message :
+                    reason;
+        return {
+            name      : 'Error',
+            status    : response ? response.status : null,
+            url       : url,
+            message   : text,
+            text      : text,
+            statusText: text
+        };
+    }
 
     //Set event handler for unhandled rejections
-    window.onunhandledrejection = function(e){
+    window.onunhandledrejection = function(e, promise){
         if (e && e.preventDefault)
             e.preventDefault();
 
-        if (e && e.detail){
-            var reason = e.detail.reason || {},
-                promise = e.detail.promise,
-                promiseOptions = promise.promiseOptions || {},
-                response = reason.response || {},
-                url = response.url || promiseOptions.url || '';
+        //Unknown why, but in some browwsers onunhandledrejection is called twice - one time with e.detail
+        if (e && e.detail)
+            return false;
 
-            //Call default error handler
-            Promise.defaultErrorHandler( reason, url );
-        }
+        var url = promise && promise.promiseOptions ? promise.promiseOptions.url : null;
+
+        Promise.defaultErrorHandler( createErrorObject( e, url ) );
     };
+
+    function callDefaultErrorHandle(reason, url){
+        return Promise.defaultErrorHandler( createErrorObject( reason, url ) );
+    }
+
 
     /**************************************************************
     Promise.fetch( url, options )
@@ -40064,8 +40105,6 @@ module.exports = ret;
         //Adding parame dummy=12345678 if options.noCache: true to force no-cache. TODO: Replaced with correct header
         if (options.noCache)
             url = url + (url.indexOf('?') > 0 ? '&' : '?') + 'dummy='+Math.random().toString(36).substr(2, 9);
-
-
 
         return new Promise(function(resolve, reject) {
             var wrappedFetch = function(n) {
@@ -40132,7 +40171,6 @@ module.exports = ret;
 
         if ( !xml || xml.getElementsByTagName( "parsererror" ).length ) {
             var error = new Error("Invalid XML");
-            //error.response = response;
             throw error;
         }
         return xml;
@@ -40142,11 +40180,10 @@ module.exports = ret;
     Promise.get = function(url, options, resolve, reject, fin) {
         options = $.extend({}, {
             //Default options
-            url: url,
+            url                   : url,
             useDefaultErrorHandler: true,
             retries               : 0
         }, options || {} );
-
 
         resolve = resolve || options.resolve || options.done;
         reject  = reject  || options.reject  || options.fail;
@@ -40186,24 +40223,27 @@ module.exports = ret;
             result = result.then( resolve );
 
         //Adding error/reject promise
+        var defaultReject = function(reason){
+                return callDefaultErrorHandle(reason, options.url);
+            };
+
         if (reject){
             //If options.useDefaultErrorHandler => also needs to call => Promise.defaultErrorHandler
             if (options.useDefaultErrorHandler)
-                result = result.catch( function( /*reason, url */ ){
-                    reject.apply( null, arguments );
-                    return Promise.defaultErrorHandler.apply( null, arguments );
+                result = result.catch( function( reason ){
+                    reject( createErrorObject( reason, options.url ) );
+                    return defaultReject.call( null, reason );
                 });
             else
                 //Just use reject as catch
-                result = result.catch( reject );
-
+                result = result.catch( function( reason ){
+                    return reject( createErrorObject( reason, options.url ) );
+                });
         }
-        else {
+        else
             if (!options.useDefaultErrorHandler)
                 //Prevent the use of Promise.defaultErrorHandler
                 result = result.catch( function(){} );
-
-        }
 
         //Adding finally (if any)
         if (fin)
@@ -40242,12 +40282,6 @@ module.exports = ret;
                             $.extend( {}, options , { format: 'xml' }),
                             resolve, reject, fin );
     };
-
-
-    //Initialize/ready
-    $(function() {
-
-    });
 
 }(jQuery, this, Promise, document));
 
@@ -54892,22 +54926,27 @@ module.exports = g;
 (function ($ /*, window, document, undefined*/) {
 	"use strict";
 
+    // Create $.BSASMODAL - See src/jquery-bootstrap.js for details
+    $.BSASMODAL = $.BSASMODAL || {};
+
     //Add/Remove class "show" to .card
     function card_onShown(){
         var $this = $(this);
         if ($this.children('.collapse.show').length)
             $this.addClass('show');
     }
+
     function card_onHidden(){
         var $this = $(this);
         if (!$this.children('.collapse.show').length)
             $this.removeClass('show');
+        accordion_onChange($this);
     }
-
 
     //card_onShow_close_siblings: Close all open siblings when card is shown
     function card_onShow_close_siblings(){
-        $(this).siblings('.show').children('.collapse').collapse('hide');
+        var $this = $(this);
+        $this.siblings('.show').children('.collapse').collapse('hide');
     }
 
     //card_onShown_close_siblings: Close all open siblings when card is shown BUT without animation
@@ -54918,7 +54957,17 @@ module.exports = g;
             card_onShow_close_siblings.call(this);
             $this.removeClass('no-transition');
         }
+        accordion_onChange($this);
     }
+
+    //update_status: Create a
+    function accordion_onChange($element){
+        var $accordion = $element.parents('.accordion').last(),
+            onChange = $accordion.data('accordion_onChange');
+        if (onChange)
+            onChange($accordion, $accordion.bsAccordionStatus());
+    }
+
 
     /**********************************************************
     bsAccordion( options ) - create a Bootstrap-accordion
@@ -54948,13 +54997,14 @@ module.exports = g;
     **********************************************************/
     var accordionId = 0;
 
-    function bsAccordion_asModal( options ){
+    $.BSASMODAL.BSACCORDION = function( options ){
         return $.bsModal( $.extend( {
                               flexWidth: true,
                               content  : this,
                           }, options)
                );
-    }
+    };
+
 
     $.bsAccordion = function( options ){
         var id = 'bsAccordion'+ accordionId++;
@@ -54972,6 +55022,7 @@ module.exports = g;
         }
 
         var $result = $('<div/>')
+                        .addClass('BSACCORDION')
                         ._bsAddBaseClassAndSize( options )
                         .attr({
                             'id'      : id,
@@ -54997,7 +55048,7 @@ module.exports = g;
                             .on( 'shown.bs.collapse',  card_onShown )
                             .on( 'hidden.bs.collapse', card_onHidden )
                             .on( 'show.bs.collapse',   options.multiOpen ? null : card_onShow_close_siblings )
-/*HER*/                            .on( 'shown.bs.collapse',  options.multiOpen ? null : card_onShown_close_siblings )
+                            .on( 'shown.bs.collapse',  options.multiOpen ? null : card_onShown_close_siblings )
                             .appendTo( $result ),
                 headerAttr = {
                     'id'  : headerId,
@@ -55066,9 +55117,27 @@ module.exports = g;
         }); //End of $.each( options.list, function( index, opt ){
 
         $result.collapse(/*options*/);
-        $result.asModal = bsAccordion_asModal;
+
+        if (options.onChange){
+            $result.data('accordion_onChange', options.onChange);
+            options.onChange($result, $result.bsAccordionStatus());
+        }
 
         return $result;
+    };
+
+
+    //Extend $.fn with method to get status for an accordion open/slose status
+    $.fn.bsAccordionStatus = function(){
+        function getStatus($elem){
+            var result = [];
+            $elem.children('.card').each( function(index, elem){
+                var $elem = $(elem);
+                result[index] = $elem.hasClass('show') ? getStatus($elem.find('> .collapse > .card-block > .accordion')) : false;
+            });
+            return result.length ? result : true;
+        }
+        return getStatus(this);
     };
 
 
@@ -57078,11 +57147,29 @@ options
         }
     }
 
+    function _updateFixedAndFooterInOptions( options ){
+        //Adjust options if footer: true or extendedContent: true
+        //If options.extended.fixedContent == true and/or options.extended.footer == true => normal and extended uses same fixed and/or footer content
+        if (options.extended) {
+            //If common fixed content => add it as normal fixed content
+            if ((options.fixedContent === true) || (options.extended.fixedContent === true)) {
+                options.fixedContent = options.fixedContent === true ? options.extended.fixedContent : options.fixedContent;
+                options.extended.fixedContent = options.extended.fixedContent === true ? options.fixedContent : options.extended.fixedContent;
+            }
+
+            //If common footer content => add it as extended footer content
+            if ((options.footer === true) || (options.extended.footer === true)) {
+                options.footer = options.footer === true ? options.extended.footer : options.footer;
+                options.extended.footer = options.extended.footer === true ? options.footer : options.extended.footer;
+            }
+        }
+    }
+
+
     /******************************************************
     prototype for bsModal
     ******************************************************/
     var bsModal_prototype = {
-
         show  : function(){
                     this.modal('show');
 
@@ -57130,6 +57217,7 @@ options
             this.setHeaderIconEnabled(id, true);
         },
 
+
         /******************************************************
         update
         Empty and replace the content of the header, content, fixed-content, footer and
@@ -57142,7 +57230,7 @@ options
         update: function( options ){
             var _this = this;
             //***********************************************************
-            function updateElement( $element, newOptions, methodName, param ){
+            function updateElement( test, $element, newOptions, methodName, param ){
                 if ($element && newOptions){
                     $element.empty();
                     $element[methodName](newOptions, param);
@@ -57152,8 +57240,10 @@ options
 
             //Update header
             var $iconContainer = this.bsModal.$header.find('.header-icon-container').detach();
-            updateElement(this.bsModal.$header, options, '_bsHeaderAndIcons');
+            updateElement(0, this.bsModal.$header, options, '_bsHeaderAndIcons');
             this.bsModal.$header.append($iconContainer);
+
+            _updateFixedAndFooterInOptions(options);
 
             //Update the tree size-contents
             $.each([null, 'minimized', 'extended'], function(index, id){
@@ -57161,16 +57251,13 @@ options
                     contentOptions = id ? options[id]       : options;
 
                 if (containers && contentOptions){
-                    updateElement( containers.$fixedContent, contentOptions.fixedContent, '_bsAddHtml',       true );
-                    updateElement( containers.$content,      contentOptions.content,      '_bsAppendContent', contentOptions.contentContext );
-                    updateElement( containers.$footer,       contentOptions.footer === true ? '' : contentOptions.footer,       '_bsAddHtml' );
+                    updateElement( 1, containers.$fixedContent, contentOptions.fixedContent, '_bsAddHtml',       true );
+                    updateElement( 2, containers.$content,      contentOptions.content,      '_bsAppendContent', contentOptions.contentContext );
+                    updateElement( 3, containers.$footer,       contentOptions.footer,       '_bsAddHtml' );
                 }
             });
-
-
             return this;
         }
-
     };
 
     /******************************************************
@@ -57178,7 +57265,7 @@ options
     Create the body and footer content (exc header and bottoms)
     of a modal inside this. Created elements are saved in parts
     ******************************************************/
-    $.fn._bsModalBodyAndFooter = function(size, options, parts, className, noClassNameForFixed, noClassNameForFooter){
+    $.fn._bsModalBodyAndFooter = function(size, options, parts, className){
 
         //Set variables used to set scroll-bar (if any)
         var hasScroll       = !!options.scroll,
@@ -57200,14 +57287,15 @@ options
             $modalFixedContent = parts.$fixedContent =
                 $('<div/>')
                     .addClass('modal-body-fixed')
-                    .toggleClass(className, !noClassNameForFixed)
+                    .addClass(className || '')
                     .addClass(scrollbarClass )
-                    .toggleClass('no-vertical-padding',         !!/*options*/fixedOptions.noVerticalPadding)
-                    .toggleClass('no-horizontal-padding',       !!/*options*/fixedOptions.noHorizontalPadding)
-                    .toggleClass('modal-body-semi-transparent', !!/*options*/fixedOptions.semiTransparent)
-                    .toggleClass('modal-type-' + options.type,  !!/*options*/fixedOptions.type)
+                    .toggleClass('no-vertical-padding',         !!fixedOptions.noVerticalPadding)
+                    .toggleClass('no-horizontal-padding',       !!fixedOptions.noHorizontalPadding)
+                    .toggleClass('modal-body-semi-transparent', !!fixedOptions.semiTransparent)
+                    .toggleClass('modal-type-' + options.type,  !!fixedOptions.type)
                     .addClass(options.fixedClassName || '')
                     .appendTo( this );
+
         if (options.fixedContent)
             $modalFixedContent._bsAddHtml( options.fixedContent, true );
 
@@ -57250,9 +57338,9 @@ options
         //Add footer
         parts.$footer =
                 $('<div/>')
-                    .addClass('modal-footer-header ' + (noClassNameForFooter ? '' : className))
+                    .addClass('modal-footer-header ' + className)
                     .appendTo( this )
-                    ._bsAddHtml( options.footer === true ? '' : options.footer );
+                    ._bsAddHtml( options.footer );
 
         //Add onClick to all elements - if nedded
         if (options.onClick){
@@ -57424,23 +57512,7 @@ options
         }
 
         //If options.extended.fixedContent == true and/or options.extended.footer == true => normal and extended uses same fixed and/or footer content
-        var noClassNameForFixed = false,
-            noClassNameForFooter = false;
-        if (options.extended) {
-            //If common fixed content => add it as normal fixed content
-            if ((options.fixedContent === true) || (options.extended.fixedContent === true)) {
-                noClassNameForFixed = true;
-                options.fixedContent = options.extended.fixedContent === true ? options.fixedContent : options.extended.fixedContent;
-                options.extended.fixedContent = '';
-            }
-
-            //If common footer content => add it as extended footer content
-            if ((options.footer === true) || (options.extended.footer === true)) {
-                noClassNameForFooter = true;
-                options.extended.footer = options.extended.footer === true ? options.footer : options.extended.footer;
-                options.footer = '';
-            }
-        }
+        _updateFixedAndFooterInOptions(options);
 
         //Create minimized content
         if (options.minimized){
@@ -57478,14 +57550,14 @@ options
                     modalDiminish :
                     null;
 
-        $modalContent._bsModalBodyAndFooter('normal', options, this.bsModal, '', noClassNameForFixed, false );
+        $modalContent._bsModalBodyAndFooter('normal', options, this.bsModal);
 
         //Create extended content (if any)
         if (options.extended){
             this.bsModal.extended = {};
             if (options.extended.clickable)
                 options.extended.onClick = options.extended.onClick || modalDiminish;
-            $modalContent._bsModalBodyAndFooter( 'extended', options.extended, this.bsModal.extended, '', false, noClassNameForFooter );
+            $modalContent._bsModalBodyAndFooter( 'extended', options.extended, this.bsModal.extended);
         }
 
         //Add buttons (if any). Allways hidden for minimized
@@ -58896,6 +58968,10 @@ options
 (function ($/*, window, document, undefined*/) {
 	"use strict";
 
+    // Create $.BSASMODAL - See src/jquery-bootstrap.js for details
+    $.BSASMODAL = $.BSASMODAL || {};
+
+
 /******************************************************************
 bsTable( options )
 options
@@ -59034,6 +59110,78 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
         return $element;
     }
 
+
+    /**********************************************************
+    asModal - display the table in a modal-window with fixed header and scrolling content
+    **********************************************************/
+    $.BSASMODAL.BSTABLE = function( modalOptions ){
+        var showHeader = this.find('.no-header').length == 0,
+            _this      = this,
+            $tableWithHeader,
+            $result, $thead, count;
+
+        if (showHeader){
+            //Clone the header and place them in fixed-body of the modal. Hide the original header by padding the table
+            //Add on-click on the clone to 'pass' the click to the original header
+            this.$theadClone = this.find('thead').clone( true, false );
+
+            this.$theadClone.find('th').on('click', function( event ){
+                var columnIndex = $(event.delegateTarget).index();
+                _this.sortBy( columnIndex );
+            });
+
+            $tableWithHeader =
+                $('<table/>')
+                    ._bsAddBaseClassAndSize( this.data(dataTableId) )
+                    .addClass('table-with-header')
+                    .append( this.$theadClone );
+            $thead = this.find('thead');
+            count  = 20;
+        }
+
+        $result = $.bsModal(
+                        $.extend( modalOptions || {}, {
+                            flexWidth        : true,
+                            noVerticalPadding: true,
+                            content          : this,
+                            fixedContent     : $tableWithHeader
+                        })
+                      );
+
+        if (showHeader){
+            //Using timeout to wait for the browser to update DOM and get height of the header
+            var setHeaderHeight = this.setHeaderHeight = function(){
+                    var height = $tableWithHeader.outerHeight();
+                    if (height <= 0){
+                        count--;
+                        if (count){
+                            //Using timeout to wait for the browser to update DOM and get height of the header
+                            setTimeout( setHeaderHeight, 50 );
+                            return;
+                        }
+                    }
+
+                    _this.css('margin-top', -height+'px');
+                    setHeaderWidth();
+
+                    //Only set header-height once
+                    $result.off('shown.bs.modal.table', setHeaderHeight );
+                },
+
+                setHeaderWidth = function(){
+                    $thead.find('th').each(function( index, th ){
+                        _this.$theadClone.find('th:nth-child(' + (index+1) + ')')
+                            .width( $(th).width()+'px' );
+                    });
+                    $tableWithHeader.width( _this.width()+'px' );
+                };
+
+            $result.on('shown.bs.modal.table', setHeaderHeight );
+            $thead.resize( setHeaderWidth );
+        }
+
+        return $result;
+    };
 
     /**********************************************************
     Prototype for bsTable
@@ -59282,80 +59430,7 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
             if (this.setHeaderHeight)
                 this.setHeaderHeight();
             return this;
-        },
-
-        /**********************************************************
-        asModal - display the table in a modal-window with fixed header and scrolling content
-        **********************************************************/
-        asModal: function( modalOptions ){
-            var showHeader = this.find('.no-header').length == 0,
-                _this      = this,
-                $tableWithHeader,
-                $result, $thead, count;
-
-            if (showHeader){
-                //Clone the header and place them in fixed-body of the modal. Hide the original header by padding the table
-                //Add on-click on the clone to 'pass' the click to the original header
-                this.$theadClone = this.find('thead').clone( true, false );
-
-                this.$theadClone.find('th').on('click', function( event ){
-                    var columnIndex = $(event.delegateTarget).index();
-                    _this.sortBy( columnIndex );
-                });
-
-                $tableWithHeader =
-                    $('<table/>')
-                        ._bsAddBaseClassAndSize( this.data(dataTableId) )
-                        .addClass('table-with-header')
-                        .append( this.$theadClone );
-                $thead = this.find('thead');
-                count  = 20;
-            }
-
-            $result = $.bsModal(
-                            $.extend( modalOptions || {}, {
-                                flexWidth        : true,
-                                noVerticalPadding: true,
-                                content          : this,
-                                fixedContent     : $tableWithHeader
-                            })
-                          );
-
-            if (showHeader){
-                //Using timeout to wait for the browser to update DOM and get height of the header
-                var setHeaderHeight = this.setHeaderHeight = function(){
-                        var height = $tableWithHeader.outerHeight();
-                        if (height <= 0){
-                            count--;
-                            if (count){
-                                //Using timeout to wait for the browser to update DOM and get height of the header
-                                setTimeout( setHeaderHeight, 50 );
-                                return;
-                            }
-                        }
-
-                        _this.css('margin-top', -height+'px');
-                        setHeaderWidth();
-
-                        //Only set header-height once
-                        $result.off('shown.bs.modal.table', setHeaderHeight );
-                    },
-
-                    setHeaderWidth = function(){
-                        $thead.find('th').each(function( index, th ){
-                            _this.$theadClone.find('th:nth-child(' + (index+1) + ')')
-                                .width( $(th).width()+'px' );
-                        });
-                        $tableWithHeader.width( _this.width()+'px' );
-                    };
-
-                $result.on('shown.bs.modal.table', setHeaderHeight );
-                $thead.resize( setHeaderWidth );
-            }
-
-            return $result;
         }
-
     }; //end of bsTable_prototype = {
 
     /**********************************************************
@@ -59364,6 +59439,8 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
     var tableId    = 0,
         rowId      = 0,
         sortId     = 0;
+
+
 
     $.bsTable = function( options ){
 
@@ -59407,6 +59484,7 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
 
         var id = 'bsTable'+ tableId++,
             $table = $('<table/>')
+                        .addClass('BSTABLE')
                         ._bsAddBaseClassAndSize( options )
                         .attr({
                             'id': id
@@ -59543,6 +59621,32 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
 (function ($/*, window, document, undefined*/) {
 	"use strict";
 
+    // Create $.BSASMODAL - See src/jquery-bootstrap.js for details
+    $.BSASMODAL = $.BSASMODAL || {};
+
+
+    $.BSASMODAL.BSTABS = function( options ){
+        var $result =
+                $.bsModal(
+                    $.extend( {
+                        flexWidth          : true,
+                        noVerticalPadding  : true,
+                        noHorizontalPadding: true,
+                        scroll             : false,
+                        content            : this._$contents,
+                        fixedContent       : this._$tabs,
+                    }, options)
+               );
+
+        //Save ref to the scrollBar containing the content and update scrollBar when tab are changed
+        var $scrollBar = $result.data('bsModalDialog').bsModal.$content.parent();
+        this._$tabs.find('a').on('shown.bs.tab', function() {
+            $scrollBar.perfectScrollbar('update');
+        });
+
+        return $result;
+    };
+
     /******************************************************
     bsTabs
 <nav>
@@ -59560,7 +59664,8 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
     ******************************************************/
     var tabsId = 0;
     $.bsTabs = function( options ){
-        var $result = $('<div/>'),
+        var $result = $('<div/>')
+                        .addClass('BSTABS'),
             id = 'bsTabs'+ tabsId++,
 
             $tabs =
@@ -59648,35 +59753,11 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
                 $content._bsAppendContent( opt.content, opt.contentContext );
 
         });
-        $result.asModal = bsTabs_asModal;
         $result._$tabs = $tabs;
         $result._$contents = $contents;
 
         return $result;
     };
-
-    function bsTabs_asModal( options ){
-        var $result =
-                $.bsModal(
-                    $.extend( {
-                        flexWidth          : true,
-                        noVerticalPadding  : true,
-                        noHorizontalPadding: true,
-                        scroll             : false,
-                        content            : this._$contents,
-                        fixedContent       : this._$tabs,
-                    }, options)
-               );
-
-        //Save ref to the scrollBar containing the content and update scrollBar when tab are changed
-        var $scrollBar = $result.data('bsModalDialog').bsModal.$content.parent();
-        this._$tabs.find('a').on('shown.bs.tab', function() {
-            $scrollBar.perfectScrollbar('update');
-        });
-
-        return $result;
-    }
-
 
     //Extend $.fn with method to select a tab given by id (string) or index (integer)
     $.fn.bsSelectTab = function( indexOrId ){
@@ -59721,7 +59802,29 @@ TODO:   truncate     : false. If true the column will be truncated. Normally onl
     //Create namespace
 	var ns = window;
 
-    ns.bsIsTouch =  true;
+    /*
+    Create $.BSASMODAL = record with {className: asModal-function} where className is added to any $element that have a asModal-function
+    Ex.:
+    $.BSASMODAL['BSTABLE'] = function(){ //Create bsModal for this }
+    var myTable = $.bsTable({...}); //Add 'BSTABLE' to class-name for  result
+    myTable.asModal({...});
+    */
+    $.BSASMODAL = $.BSASMODAL || {};
+    $.fn.asModal = function(options){
+        var _this   = this,
+            asModal = null;
+
+        $.each($.BSASMODAL, function(id, asModalFunc){
+            if (_this.hasClass(id)){
+                asModal = asModalFunc;
+                return false;
+            }
+        });
+        return asModal ? $.proxy(asModal, this)( options ) : null;
+    };
+
+
+    ns.bsIsTouch = true;
 
     $.EMPTY_TEXT = '___***EMPTY***___';
 

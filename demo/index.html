@@ -24,28 +24,33 @@
         i18next.changeLanguage('en');
 
 
-        Promise.defaultErrorHandler = function(reason, url){ console.log('ERROR', reason, url ); };
+        Promise.defaultErrorHandler = function(errorObj){
+            console.log('defaultErrorHandler', errorObj );
+        };
+
 
         var theMarkdown, theMarkdown2;
         function showMarkdown(){
+
             theMarkdown =
                 theMarkdown || $.bsMarkdown({
-                    url : 'data/browser/browser.txt',
-                    header: 'This is the header',
-                    loading: 'Loading...',
-                });
-
-            theMarkdown.asBsModal( true );
-
-            theMarkdown2 =
-                theMarkdown2 || $.bsMarkdown({
                     url : 'data/test1.txt',
                     header: 'This modal do not reset',
                     loading: 'Loading...',
                     reset: false
                 });
 
+            theMarkdown.asBsModal( true );
+
+            theMarkdown2 =
+                theMarkdown2 || $.bsMarkdown({
+                    url : 'data/browser/browser.txt',
+                    header: 'This is the header',
+                    loading: 'Loading...',
+                });
+
             theMarkdown2.asBsModal( true );
+
 
         }
 	</script>

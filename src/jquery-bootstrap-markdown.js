@@ -213,22 +213,14 @@
             }
             window.Promise.getText(
                 _this.options.url, {
-                    "resolve": function( content ){ _this.content = content; },
-                    "finally": _this._onLoad.bind(_this),
-                }
+                    resolve: _this._resolve.bind(_this),
+                    reject : _this._reject.bind(_this)
+            }
             );
         },
 
-        _onLoad: function(){
-            //If no expected content was loaded => go back to previous file (if any) or close the modal-window
-            if (!this.content){
-                if (this.historyList.index >= 0)
-                    this.historyList.goBack();
-                else
-                    this.bsModal.modal('hide');
-                return;
-            }
-
+        _resolve: function( content ){
+            this.content = content;
             this.$modalContainer.empty();
 
             //Convert content (if any) to html OR use header as content
@@ -243,6 +235,18 @@
 
             //Remove fixed height set during loading
             this.$modalContainer.parent().css('height', 'initial');
+        },
+
+
+        _reject: function(){
+            //If no expected content was loaded => go back to previous file (if any) or close the modal-window
+            var closeModal = (this.historyList.index <= 0);
+            if (this.historyList.index >= 0){
+                this.historyList.goBack();
+                this.historyList.clearFuture();
+            }
+            if (closeModal)
+                this.bsModal.close();
         },
 
         _onClose: function(){
@@ -276,7 +280,7 @@
                     flexWidth    : true,
                     extraWidth   : this.options.extraWidth,
 //                    noVerticalPadding
-                    content      : function( $container ){ _this.$modalContainer = $container; },
+                    content      : '&nbsp;',//function( $container ){ _this.$modalContainer = _this.$modalContainer || $container; },
                     scroll       : true,
 
                     historyList: this.historyList,
@@ -317,6 +321,8 @@
                               }] : [],
 //                    closeText
                 });
+
+            this.$modalContainer = this.$modalContainer || this.bsModal.bsModal.$content;
 
             if (this.options.reset || (this.historyList.lastIndex <= 0)){
                 //Hide back- and forward-icons
