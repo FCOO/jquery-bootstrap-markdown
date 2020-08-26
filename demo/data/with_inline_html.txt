@@ -1,0 +1,17 @@
+<da>**Antal kort**</da><en>**Number of Maps**</en>
+Det er muligt, at se op til 5 (3 på mobil) kort samtidig.
+
+
+<h1>Synkronisering med hovedkort</h1>
+Det største eller første kort er altid hovedkortet. Det er markeret med blå ramme.
+Man kan vælge, at de andre kort er synkroniseret med hovedkortet mht.
+
+- Det tidspunkt, der vises i kortet
+- Position og zoom-niveau.
+
+
+
+
+De enkelte kort kan synkroniseres med hovedkortet, både position, zoom og tidspunkt.
+Klik på <span class="container-stacked-icons"><i class="far fa-map fa-MAIN-small-right-bottom stacked-icon"></i><i class="fas fa-circle fa-circle-small-right-bottom stacked-icon"></i><i class="far fa-cog fa-SUB-small-right-bottom stacked-icon"></i></span>for at sætte ...
+Klik på <i class="far fa-map"></i> for at sætte... Klik på <img style="width:20px; height:20px"/>  for at sætte ...

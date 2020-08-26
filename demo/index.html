@@ -29,7 +29,7 @@
         };
 
 
-        var theMarkdown, theMarkdown2;
+        var theMarkdown, theMarkdown2, theMarkdown3;
         function showMarkdown(){
 
             theMarkdown =
@@ -50,11 +50,24 @@
                 });
 
             theMarkdown2.asBsModal( true );
+        }
 
+        function showMarkdown3(){
+
+            theMarkdown3 =
+                theMarkdown3 || $.bsMarkdown({
+                    url : 'data/with_inline_html.txt',
+                    header: 'With inline html',
+                    loading: 'Loading...',
+                    reset: false
+                });
+
+            theMarkdown3.asBsModal( true );
 
         }
 	</script>
 
     <button onClick="showMarkdown()">Click here!</button>
+    <button onClick="showMarkdown3()">..or click here</button>
 </body>
 </html>
