@@ -270,12 +270,10 @@
         asBsModal: function( show ){
             var _this = this;
 
-            this.bsModal =
-                this.bsModal ||
+            this.bsModal = this.bsModal ||
                 $.bsModal({
                     header  : this.options.header,
                     show    : false,
-
                     fixedContent : this.options.fixedContent,
                     flexWidth    : true,
                     extraWidth   : this.options.extraWidth,
